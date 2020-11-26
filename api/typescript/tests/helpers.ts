@@ -31,3 +31,20 @@ export const authorizeUpload = async (uploadKey: string, bucket: string) :Promis
         throw new DatatypeException("AuthenticationResponse", data)
     })
 }
+
+export const httpGet = async (url: string) :Promise<string> => {
+    return fetch(url, {
+        method: 'GET',
+    }).then(res => {
+        if (res.status === 401)
+            return res.text().then(data => {
+                throw new AuthenticationException(data)
+            })
+        else if (res.status !== 200)
+            return res.text().then(data => {
+                throw new HttpException(data, res.status)
+            })
+
+        return res.text()
+    })
+}

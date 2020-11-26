@@ -35,3 +35,21 @@ jobs:
           go test -v  ./...
           go build -v .
         working-directory: 'service/'
+
+      - name: Run Backend service
+        env:
+          MEMCACHED_HOST: localhost
+          MASTER_KEY: TEST_MASTER_KEY
+          UPLOAD_KEY: TEST_UPLOAD_KEY
+          ROOT_DIR: /tmp
+          STATIKA_PORT: 8080
+        run: ./service 1>/dev/null 2>/dev/null &
+        working-directory: 'service/'
+
+      - name: Typescript API step
+        run: |
+          npm install
+          npm run build
+          npm run test:ci
+        working-directory: 'api/typescript/'
+

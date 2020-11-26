@@ -9,6 +9,7 @@ export class HttpException extends Error {
         let message = `API response code: ${statusCode}`
         if (statusText !== undefined && statusText.length > 0)
             message = `${message}; Message: ${statusText}`
+
         super(message);
 
         this.statusText = statusText

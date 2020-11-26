@@ -6,7 +6,7 @@ import {beforeAll, test, expect} from "@jest/globals"
 import {Statika, responseOk, pickDefined, testCoordinates} from "../src";
 import {authorizeUpload} from "./helpers";
 
-const UPLOAD_KEY = "TEST UPLOAD KEY"
+const UPLOAD_KEY = "TEST_UPLOAD_KEY"
 const TEST_BUCKET = "test_bucket"
 
 const host = pickDefined(process.env.API_NODE, "127.0.0.1")

@@ -27,6 +27,9 @@ class AsynchronousApi {
     protected post(authToken: AuthType, url: string, obj: any) :Promise<any> {
         let addr = this.storage.toString()
 
+        if (!url.startsWith("/"))
+            url = `/${url}`
+
         return fetch(`${addr}/rest/v1${url}`, {
             method: 'POST',
             credentials: "same-origin",
@@ -53,6 +56,9 @@ class AsynchronousApi {
     protected delete(authToken: AuthType, url: string) :Promise<any> {
         let addr = this.storage.toString()
 
+        if (!url.startsWith("/"))
+            url = `/${url}`
+
         return fetch(`${addr}/rest/v1${url}`, {
             method: 'DELETE',
             credentials: "same-origin",
@@ -77,6 +83,9 @@ class AsynchronousApi {
 
     protected get(authToken: AuthType, url: string) :Promise<any> {
         let addr = this.storage.toString()
+
+        if (!url.startsWith("/"))
+            url = `/${url}`
 
         return fetch(`${addr}/rest/v1${url}`, {
             method: 'GET',
@@ -119,7 +128,33 @@ class AsynchronousApi {
     }
 
     deleteFile(fileName: string) :Promise<ApiResponse> {
-        return undefined
+        let addr = this.storage.toString()
+
+        if (!fileName.startsWith("/"))
+            fileName = `/${fileName}`
+
+        return fetch(`${addr}${fileName}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': this.uploadToken,
+            },
+        }).then(res => {
+            if (res.status === 401)
+                return res.text().then(data => {
+                    throw new AuthenticationException(data)
+                })
+            else if (res.status !== 200)
+                return res.text().then(data => {
+                    throw new HttpException(data, res.status)
+                })
+
+            return res.json()
+        }).then(data => {
+            if (isApiResponse(data))
+                return data as ApiResponse
+
+            throw new DatatypeException("ApiResponse", data)
+        })
     }
 
     updateMetaInfo(fileName: string, metaInfo: MetaType = undefined) :Promise<ApiResponse> {
