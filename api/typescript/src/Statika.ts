@@ -4,25 +4,27 @@ import {HttpException} from "./classes/exceptions/HttpException";
 import {isAuthenticationResponse} from "./classes/responses/AuthenticationResponse";
 import {DatatypeException} from "./classes/exceptions/DatatypeException";
 import {EndpointsCoordinates} from "./classes/system/EndpointsCoordinates";
-import {ApiResponse} from "./classes/responses/ApiResponse";
+import {ApiResponse, isApiResponse} from "./classes/responses/ApiResponse";
+import 'whatwg-fetch'
 
 
 export type MetaType = Map<string, string>|undefined
 type AuthType = string
 
 class AsynchronousApi {
-    protected endpoints: EndpointsCoordinates
+    protected storage: EndpointsCoordinates
 
     protected uploadToken: string
     protected assignedBucket: string
 
-    protected constructor(token: string, bucket: string) {
+    protected constructor(storage: EndpointsCoordinates, token: string, bucket: string) {
         this.uploadToken = token
         this.assignedBucket = bucket
+        this.storage = storage
     }
 
     protected post(authToken: AuthType, url: string, obj: any) :Promise<any> {
-        let addr = this.endpoints.toString()
+        let addr = this.storage.toString()
 
         return fetch(`${addr}/rest/v1${url}`, {
             method: 'POST',
@@ -30,7 +32,7 @@ class AsynchronousApi {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': isAuthenticationResponse(authToken) ? authToken.authToken : authToken
+                'Authorization': isAuthenticationResponse(authToken) ? authToken.token : authToken
             },
             body: JSON.stringify(obj)
         }).then(res => {
@@ -48,7 +50,7 @@ class AsynchronousApi {
     }
 
     protected delete(authToken: AuthType, url: string) :Promise<any> {
-        let addr = this.endpoints.toString()
+        let addr = this.storage.toString()
 
         return fetch(`${addr}/rest/v1${url}`, {
             method: 'DELETE',
@@ -56,7 +58,7 @@ class AsynchronousApi {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': isAuthenticationResponse(authToken) ? authToken.authToken : authToken
+                'Authorization': isAuthenticationResponse(authToken) ? authToken.token : authToken
             },
         }).then(res => {
             if (res.status === 401)
@@ -73,7 +75,7 @@ class AsynchronousApi {
     }
 
     protected get(authToken: AuthType, url: string) :Promise<any> {
-        let addr = this.endpoints.toString()
+        let addr = this.storage.toString()
 
         return fetch(`${addr}/rest/v1${url}`, {
             method: 'GET',
@@ -81,7 +83,7 @@ class AsynchronousApi {
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': isAuthenticationResponse(authToken) ? authToken.authToken : authToken
+                'Authorization': isAuthenticationResponse(authToken) ? authToken.token : authToken
             },
         }).then(res => {
             if (res.status === 401)
@@ -134,7 +136,12 @@ class AsynchronousApi {
     }
 
     ping() :Promise<ApiResponse> {
-        return undefined
+        return this.get(this.uploadToken, "/ping").then(data => {
+            if (isApiResponse(data))
+                return data as ApiResponse
+
+            throw new DatatypeException("ApiResponse", data)
+        })
     }
 }
 
@@ -146,8 +153,8 @@ export class Statika extends AsynchronousApi {
      * @param token - Upload token, usually generated in backend code on the fly, and fused into frontend app
      * @param bucket - Optional folder for splitting end users
      */
-    constructor(token: string, bucket: string = "") {
-        super(token, bucket)
+    constructor(storage: EndpointsCoordinates, token: string, bucket: string = "") {
+        super(storage, token, bucket)
     }
 
 }
