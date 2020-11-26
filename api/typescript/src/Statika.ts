@@ -1,11 +1,12 @@
-import {isUploadResponse, UploadResponse} from "./classes/responses/UploadResponse";
+import {isUploadResponse, UploadResponse} from "./classes/comms/UploadResponse";
 import {AuthenticationException} from "./classes/exceptions/AuthenticationException";
 import {HttpException} from "./classes/exceptions/HttpException";
-import {isAuthenticationResponse} from "./classes/responses/AuthenticationResponse";
+import {isAuthenticationResponse} from "./classes/comms/AuthenticationResponse";
 import {DatatypeException} from "./classes/exceptions/DatatypeException";
 import {EndpointsCoordinates} from "./classes/system/EndpointsCoordinates";
-import {ApiResponse, isApiResponse} from "./classes/responses/ApiResponse";
+import {ApiResponse, isApiResponse} from "./classes/comms/ApiResponse";
 import 'whatwg-fetch'
+import {bufferUploadRequest} from "./classes/comms/UploadRequest";
 
 
 export type MetaType = Map<string, string>|undefined
@@ -103,11 +104,13 @@ class AsynchronousApi {
 
     /**
      *
-     * @param f
+     * @param fileName - name of the file to be uploaded
+     * @param f - ArrayBuffer with actual file content
      * @param metaInfo - optional string/string dictionary to be stored together with file
      */
-    uploadFile(f: ArrayBuffer, metaInfo: MetaType = undefined) :Promise<UploadResponse> {
-        return this.post("", "/file", f).then(data => {
+    uploadFile(fileName: string, f: ArrayBuffer, metaInfo: MetaType = undefined) :Promise<UploadResponse> {
+        const req = bufferUploadRequest(this.assignedBucket, fileName, f, metaInfo)
+        return this.post(this.uploadToken, "/file", req).then(data => {
             if (isUploadResponse(data))
                 return data as UploadResponse
 

@@ -1,8 +1,17 @@
 
 export class HttpException extends Error {
-    constructor(public statusText: string,
-                public statusCode: number)
+    statusText: string
+    statusCode: number
+
+    constructor(statusText: string,
+                statusCode: number)
     {
-        super(statusText);
+        let message = `API response code: ${statusCode}`
+        if (statusText !== undefined && statusText.length > 0)
+            message = `${message}; Message: ${statusText}`
+        super(message);
+
+        this.statusText = statusText
+        this.statusCode = statusCode
     }
 }
