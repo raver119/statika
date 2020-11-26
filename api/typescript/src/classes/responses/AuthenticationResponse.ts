@@ -1,10 +1,10 @@
 import {ApiResponse} from "./ApiResponse";
 
 export class AuthenticationResponse extends ApiResponse {
-    authToken: string
+    token: string
     expires: number
 }
 
 export const isAuthenticationResponse = (obj: any) :obj is AuthenticationResponse => {
-    return obj.authToken !== undefined && obj.expires !== undefined
+    return obj.token !== undefined && obj.expires !== undefined
 }

@@ -1,5 +1,5 @@
 
-export {EndpointsCoordinates} from "./classes/system/EndpointsCoordinates"
+export {EndpointsCoordinates, testCoordinates, sameCoordinates} from "./classes/system/EndpointsCoordinates"
 
 export {AuthenticationResponse, isAuthenticationResponse} from "./classes/responses/AuthenticationResponse"
 export {UploadResponse, isUploadResponse} from "./classes/responses/UploadResponse"
@@ -7,5 +7,7 @@ export {ApiResponse, responseError, responseOk, responseUnauthorized} from "./cl
 
 export {HttpException} from "./classes/exceptions/HttpException"
 export {AuthenticationException} from "./classes/exceptions/AuthenticationException"
+
+export {pickDefined} from "./Utilities"
 
 export {Statika} from "./Statika"
