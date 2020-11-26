@@ -8,9 +8,6 @@ var (
 	host = GetEnvOrDefault("MEMCACHED_HOST", "localhost")
 )
 
-
-
-
 /*
 	PLEASE NOTE: This set of tests requires memcached instance to be running on MEMCACHED_HOST env var (which defaults to 127.0.0.1)
 */
@@ -21,7 +18,7 @@ func TestPersistenceAgent_CreateUploadToken(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	req := UploadAuthenticationRequest{Token:  "SOME_TOKEN", Bucket: "SOME_BUCKET", }
+	req := UploadAuthenticationRequest{Token: "SOME_TOKEN", Bucket: "SOME_BUCKET"}
 	token, err := pa.CreateUploadToken(req)
 	if err != nil {
 		t.Fatal(err)
@@ -43,6 +40,8 @@ func TestPersistenceAgent_CreateUploadToken(t *testing.T) {
 		t.Fatal("unexpected access granted")
 	}
 
-	err = pa.TouchUploadToken(token)
+	if !pa.TouchUploadToken(token) {
+		t.Fatal("expected to be ok")
+	}
 
 }
