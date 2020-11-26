@@ -43,7 +43,7 @@ func main() {
 	/*
 		Create server instance and start it
 	*/
-	fmt.Printf("Starting Statika server at port [%v], serving %v folder", port, rootFolder)
+	fmt.Printf("Starting Statika server at port [%v], serving %v folder\n", port, rootFolder)
 	engine, err := CreateEngine(keyMaster, keyUpload, rootFolder, port)
 	if err != nil {
 		fmt.Printf("CreateEngine failed: %v\n", err.Error())

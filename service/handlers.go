@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -129,6 +130,12 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	var req UploadRequest
 	err = json.Unmarshal(body, &req)
 	if !OptionallyReport(w, err) {
+		return
+	}
+
+	req.Filename = strings.TrimSpace(req.Filename)
+	if len(req.Filename) == 0 {
+		w.WriteHeader(http.StatusNotAcceptable)
 		return
 	}
 

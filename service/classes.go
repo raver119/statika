@@ -49,7 +49,7 @@ type UploadRequest struct {
 
 type UploadResponse struct {
 	Id       string `json:"id"`
-	FileName string `json:"file_name"`
+	FileName string `json:"filename"`
 }
 
 func (ur UploadResponse) ToJSON() []byte {
