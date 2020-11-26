@@ -16,6 +16,10 @@ class AsynchronousApi {
     protected uploadToken: string
     protected assignedBucket: string
 
+    protected constructor(token: string, bucket: string) {
+        this.uploadToken = token
+        this.assignedBucket = bucket
+    }
 
     protected post(authToken: AuthType, url: string, obj: any) :Promise<any> {
         let addr = this.endpoints.toString()
@@ -94,9 +98,6 @@ class AsynchronousApi {
     }
 
 
-    protected constructor() { }
-
-
 
     /**
      *
@@ -127,13 +128,26 @@ class AsynchronousApi {
     deleteMetaInfo(fileName: string) :Promise<ApiResponse> {
         return undefined
     }
+
+    listFiles() :Promise<ApiResponse> {
+        return undefined
+    }
+
+    ping() :Promise<ApiResponse> {
+        return undefined
+    }
 }
 
 
 export class Statika extends AsynchronousApi {
 
-    constructor() {
-        super()
+    /**
+     *
+     * @param token - Upload token, usually generated in backend code on the fly, and fused into frontend app
+     * @param bucket - Optional folder for splitting end users
+     */
+    constructor(token: string, bucket: string = "") {
+        super(token, bucket)
     }
 
 }
