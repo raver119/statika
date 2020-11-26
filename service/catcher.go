@@ -7,8 +7,8 @@ import (
 )
 
 type Catcher struct {
-	storage		Storage
-	pa			PersistenceAgent
+	storage Storage
+	pa      PersistenceAgent
 }
 
 func NewCatcher(root string, pa PersistenceAgent) (c Catcher, err error) {
@@ -21,7 +21,7 @@ func NewCatcher(root string, pa PersistenceAgent) (c Catcher, err error) {
 	1) Serves static files
 	2) Updates traffic counters
 	3) Handles DELETE requests
- */
+*/
 func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// only GET is supported
 	if r.Method != http.MethodGet && r.Method != http.MethodDelete {
@@ -69,8 +69,8 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		c.storage.Delete(bucket, fileName)
+		_ = c.storage.Delete(bucket, fileName)
 		w.WriteHeader(http.StatusOK)
+		w.Write(responseOK())
 	}
 }
-
