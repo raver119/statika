@@ -14,8 +14,7 @@ const (
 )
 
 type PersistenceAgent struct {
-
-	memCached 		*memcache.Client
+	memCached *memcache.Client
 }
 
 func NewPersistenceAgent(memcachedHost string, port int) (a PersistenceAgent, err error) {
@@ -53,17 +52,17 @@ func (a PersistenceAgent) CreateMasterToken(req UploadAuthenticationRequest) (au
 	return
 }
 
-func (a PersistenceAgent) CheckUploadToken(authToken string, bucket string) (bool) {
+func (a PersistenceAgent) CheckUploadToken(authToken string, bucket string) bool {
 	encAuthToken := base64.StdEncoding.EncodeToString([]byte(a.normalizeToken(authToken)))
 	bytes, err := a.memCached.Get(PrefixUpload + encAuthToken)
-	if err != nil || bucket != string(bytes.Value)  {
+	if err != nil || bucket != string(bytes.Value) {
 		return false
 	}
 
 	return true
 }
 
-func (a PersistenceAgent) normalizeToken(authToken string) string  {
+func (a PersistenceAgent) normalizeToken(authToken string) string {
 	if strings.HasPrefix(authToken, "Bearer ") {
 		authToken = strings.Replace(authToken, "Bearer ", "", 1)
 	}
@@ -71,15 +70,15 @@ func (a PersistenceAgent) normalizeToken(authToken string) string  {
 	return authToken
 }
 
-func (a PersistenceAgent) TouchUploadToken(authToken string) (err error){
+func (a PersistenceAgent) TouchUploadToken(authToken string) bool {
 	encAuthToken := base64.StdEncoding.EncodeToString([]byte(a.normalizeToken(authToken)))
-	err = a.memCached.Touch(PrefixUpload + encAuthToken, 3600)
-	return
+	err := a.memCached.Touch(PrefixUpload+encAuthToken, a.Expiration())
+	return err == nil
 }
 
-func (a PersistenceAgent) TouchMasterToken(authToken string) (err error){
+func (a PersistenceAgent) TouchMasterToken(authToken string) (err error) {
 	encAuthToken := base64.StdEncoding.EncodeToString([]byte(a.normalizeToken(authToken)))
-	err = a.memCached.Touch(PrefixMaster + encAuthToken, 3600)
+	err = a.memCached.Touch(PrefixMaster+encAuthToken, 3600)
 	return
 }
 

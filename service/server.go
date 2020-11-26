@@ -10,22 +10,22 @@ import (
 
 type Engine struct {
 	// root folder
-	root 			string
+	root string
 
 	// auth keys
 	keyMaster string
 	keyUpload string
 
-	port			int
+	port int
 
 	// all fields below will be instantiated internally
-	pa				PersistenceAgent
-	router			*mux.Router
-	static      	*http.Server
-	handlers		*ApiHandler
-	srv				*http.Server
-	wg           	*sync.WaitGroup
-	startedAsync	bool
+	pa           PersistenceAgent
+	router       *mux.Router
+	static       *http.Server
+	handlers     *ApiHandler
+	srv          *http.Server
+	wg           *sync.WaitGroup
+	startedAsync bool
 }
 
 func CreateEngine(keyMaster string, keyUpload string, rootFolder string, port int) (e Engine, err error) {
@@ -46,18 +46,18 @@ func CreateEngine(keyMaster string, keyUpload string, rootFolder string, port in
 	}
 
 	e = Engine{
-		root: rootFolder,
+		root:      rootFolder,
 		keyMaster: keyMaster,
 		keyUpload: keyUpload,
-		port: port,
-		pa: pa,
-		srv: &http.Server{Addr: ":" + strconv.Itoa(port), Handler: router},
-		wg: &sync.WaitGroup{},
+		port:      port,
+		pa:        pa,
+		srv:       &http.Server{Addr: ":" + strconv.Itoa(port), Handler: router},
+		wg:        &sync.WaitGroup{},
 	}
 	return
 }
 
-func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) ( router *mux.Router, err error) {
+func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) (router *mux.Router, err error) {
 	router = mux.NewRouter()
 
 	api := router.PathPrefix("/rest/v1").Subrouter()
@@ -65,6 +65,7 @@ func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) (
 	// API endpoints
 	api.HandleFunc("/auth/upload", handlers.LoginUpload).Methods(http.MethodPost)
 	api.HandleFunc("/auth/master", handlers.LoginMaster).Methods(http.MethodPost)
+	api.HandleFunc("/ping", handlers.Ping).Methods(http.MethodGet, http.MethodPost)
 	api.HandleFunc("/file", handlers.Upload).Methods(http.MethodPost)
 	api.HandleFunc("/meta/{bucket}/{FileId}", handlers.GetMeta).Methods(http.MethodGet)
 	api.HandleFunc("/meta/{bucket}/{FileId}", handlers.UpdateMeta).Methods(http.MethodPost)

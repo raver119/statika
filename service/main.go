@@ -11,7 +11,7 @@ func main() {
 		read tokens first:
 		MASTER_KEY - used for administrative actions only, can't be used for file uploads etc
 		UPLOAD_KEY - used for temporary tokens generation. can't be used directly.
-	 */
+	*/
 
 	keyMaster, ok := os.LookupEnv("MASTER_KEY")
 	if !ok || len(keyMaster) == 0 {
@@ -25,7 +25,7 @@ func main() {
 
 	/*
 		read root folder that will be used for storage
-	 */
+	*/
 	rootFolder, ok := os.LookupEnv("ROOT_DIR")
 	if !ok {
 		panic(fmt.Errorf("ROOT_DIR env var wasn't set"))
@@ -33,8 +33,8 @@ func main() {
 
 	/*
 		By default port 80 is used
-	 */
-	strPort := GetEnvOrDefault("STATIKA_PORT", "80")
+	*/
+	strPort := GetEnvOrDefault("STATIKA_PORT", "8080")
 	port, err := strconv.Atoi(strPort)
 	if err != nil {
 		panic(err)
@@ -42,7 +42,8 @@ func main() {
 
 	/*
 		Create server instance and start it
-	 */
+	*/
+	fmt.Printf("Starting Statika server at port [%v], serving %v folder", port, rootFolder)
 	engine, err := CreateEngine(keyMaster, keyUpload, rootFolder, port)
 	if err != nil {
 		fmt.Printf("CreateEngine failed: %v\n", err.Error())
