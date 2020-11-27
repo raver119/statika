@@ -53,3 +53,10 @@ jobs:
           npm run test:ci
         working-directory: 'api/typescript/'
 
+      - name: Golang API step
+        run: |
+          go get -v -t -d ./...
+          go test -v  ./...
+          go build -v .
+        working-directory: 'api/go-statika/'
+
