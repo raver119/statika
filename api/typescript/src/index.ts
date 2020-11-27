@@ -1,5 +1,5 @@
 
-export {EndpointsCoordinates, testCoordinates, sameCoordinates} from "./classes/system/EndpointsCoordinates"
+export {EndpointsCoordinates, testCoordinates, sameCoordinates, coordinates} from "./classes/system/EndpointsCoordinates"
 
 export {AuthenticationResponse, isAuthenticationResponse} from "./classes/comms/AuthenticationResponse"
 export {UploadResponse, isUploadResponse} from "./classes/comms/UploadResponse"

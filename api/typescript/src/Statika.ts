@@ -12,13 +12,19 @@ import {bufferUploadRequest} from "./classes/comms/UploadRequest";
 export type MetaType = Map<string, string>|undefined
 type AuthType = string
 
-class AsynchronousApi {
+export class Statika {
     protected storage: EndpointsCoordinates
 
     protected uploadToken: string
     protected assignedBucket: string
 
-    protected constructor(storage: EndpointsCoordinates, token: string, bucket: string) {
+    /**
+     *
+     * @param storage - address of the
+     * @param token - Upload token, usually generated in backend code on the fly, and fused into frontend app
+     * @param bucket - Optional folder for splitting end users
+     */
+    constructor(storage: EndpointsCoordinates, token: string, bucket: string = "") {
         this.uploadToken = token
         this.assignedBucket = bucket
         this.storage = storage
@@ -181,18 +187,4 @@ class AsynchronousApi {
             throw new DatatypeException("ApiResponse", data)
         })
     }
-}
-
-
-export class Statika extends AsynchronousApi {
-
-    /**
-     *
-     * @param token - Upload token, usually generated in backend code on the fly, and fused into frontend app
-     * @param bucket - Optional folder for splitting end users
-     */
-    constructor(storage: EndpointsCoordinates, token: string, bucket: string = "") {
-        super(storage, token, bucket)
-    }
-
 }

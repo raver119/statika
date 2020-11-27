@@ -1,11 +1,13 @@
 
+export type EndpointSchemaType = "http" | "https" | "same"
+
 /*
     This class contains information about 2 endpoints:
     1) Auth proxy endpoint
     2) Storage endpoint
  */
 export class EndpointsCoordinates {
-    constructor(public schema: "http" | "https" | "same",
+    constructor(public schema: EndpointSchemaType,
                 public hostname: string|undefined,
                 public port: number|string|undefined) {
     }
@@ -19,6 +21,10 @@ export class EndpointsCoordinates {
             return `${this.schema}://${this.hostname}${port}`
         }
     }
+}
+
+export const coordinates = (schema: EndpointSchemaType, host: string, port: number|string, sch) => {
+    return new EndpointsCoordinates(schema, host, port)
 }
 
 export const testCoordinates = (host: string, port: number|string) => {

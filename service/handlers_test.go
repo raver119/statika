@@ -97,7 +97,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 		Post("http://localhost:8080/rest/v1/file")
 
 	if resp.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v", resp.StatusCode())
+		t.Fatalf("unexpected status code: %v; body: %v", resp.StatusCode(), string(resp.Body()))
 	}
 
 	var uploadResp UploadResponse
