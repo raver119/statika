@@ -7,7 +7,7 @@ COPY ./service /service
 RUN cd /service && go get -v -t -d ./...
 
 # build app
-RUN cd sources && go build -v .
+RUN cd /service && go build -v .
 
 
 FROM ubuntu:20.04
