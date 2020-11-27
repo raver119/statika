@@ -15,8 +15,8 @@ type AuthType = string
 export class Statika {
     protected storage: EndpointsCoordinates
 
-    protected uploadToken: string
-    protected assignedBucket: string
+    protected uploadToken: string | undefined
+    protected assignedBucket: string | undefined
 
     /**
      *
@@ -24,7 +24,7 @@ export class Statika {
      * @param token - Upload token, usually generated in backend code on the fly, and fused into frontend app
      * @param bucket - Optional folder for splitting end users
      */
-    constructor(storage: EndpointsCoordinates, token: string, bucket: string = "") {
+    constructor(storage: EndpointsCoordinates, token: string = undefined, bucket: string = undefined) {
         this.uploadToken = token
         this.assignedBucket = bucket
         this.storage = storage
@@ -124,6 +124,9 @@ export class Statika {
      * @param metaInfo - optional string/string dictionary to be stored together with file
      */
     uploadFile(fileName: string, f: ArrayBuffer, metaInfo: MetaType = undefined) :Promise<UploadResponse> {
+        if (this.uploadToken === undefined || this.assignedBucket === undefined)
+            throw new AuthenticationException("Please authenticate first")
+
         const req = bufferUploadRequest(this.assignedBucket, fileName, f, metaInfo)
         return this.post(this.uploadToken, "/file", req).then(data => {
             if (isUploadResponse(data))
@@ -134,6 +137,9 @@ export class Statika {
     }
 
     deleteFile(fileName: string) :Promise<ApiResponse> {
+        if (this.uploadToken === undefined || this.assignedBucket === undefined)
+            throw new AuthenticationException("Please authenticate first")
+
         let addr = this.storage.toString()
 
         if (!fileName.startsWith("/"))
@@ -186,5 +192,10 @@ export class Statika {
 
             throw new DatatypeException("ApiResponse", data)
         })
+    }
+
+    setCredentials(uploadToken: AuthType, bucket: string) {
+        this.uploadToken = uploadToken
+        this.assignedBucket = bucket
     }
 }
