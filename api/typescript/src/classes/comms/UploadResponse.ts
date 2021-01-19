@@ -1,7 +1,7 @@
 import {ApiResponse} from "./ApiResponse";
 
 
-export class UploadResponse extends ApiResponse{
+export interface UploadResponse extends ApiResponse{
     filename: string
 }
 

@@ -1,15 +1,8 @@
 import {MetaType} from "../../Statika";
 import btoa from "btoa";
 
-export interface UploadRequest {
-    filename: string
-    bucket: string
-    payload: string
-    meta: MetaType
-}
 
-
-export const bufferUploadRequest = (bucket: string, fileName: string, buffer: ArrayBuffer, meta: MetaType = undefined) :UploadRequest => {
+export const bufferUploadRequest = (bucket: string, fileName: string, buffer: ArrayBuffer, meta: MetaType = undefined) => {
     return {
         filename: fileName,
         bucket: bucket,
@@ -17,3 +10,5 @@ export const bufferUploadRequest = (bucket: string, fileName: string, buffer: Ar
         payload: btoa(String.fromCharCode(...new Uint8Array(buffer)))
     }
 }
+
+export type UploadRequest = ReturnType<typeof bufferUploadRequest>

@@ -1,6 +1,6 @@
 import {ApiResponse} from "./ApiResponse";
 
-export class AuthenticationResponse extends ApiResponse {
+export interface AuthenticationResponse extends ApiResponse {
     token: string
     expires: number
 }

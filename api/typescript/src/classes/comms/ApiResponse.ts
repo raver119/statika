@@ -1,20 +1,22 @@
 import {HttpStatusCode} from "./HttpStatusCode";
 
-export class ApiResponse {
-    statusCode: HttpStatusCode
-    message: string = ""
+export interface ApiResponse {
+    statusCode: number
+    message: string
+}
 
-    constructor(statusCode: HttpStatusCode = HttpStatusCode.OK) {
-        this.statusCode = statusCode
+export const response = (code: number, message = "") :ApiResponse => {
+    return {
+        statusCode: code,
+        message: message
     }
 }
 
 export const isApiResponse = (obj: any) :obj is ApiResponse => {
     // TODO: add message here into validation as well
-    return obj.statusCode !== undefined
+    return obj !== undefined && obj.statusCode !== undefined
 }
 
-
-export const responseOk = () => new ApiResponse(HttpStatusCode.OK)
-export const responseUnauthorized = () => new ApiResponse(HttpStatusCode.UNAUTHORIZED)
-export const responseError = () => new ApiResponse(HttpStatusCode.INTERNAL_SERVER_ERROR)
+export const responseOk = () => response(HttpStatusCode.OK)
+export const responseUnauthorized = () => response(HttpStatusCode.UNAUTHORIZED)
+export const responseError = () => response(HttpStatusCode.INTERNAL_SERVER_ERROR)
