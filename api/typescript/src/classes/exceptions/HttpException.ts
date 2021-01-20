@@ -4,8 +4,8 @@ export class HttpException extends Error {
     statusCode: number
 
     constructor(statusText: string,
-                statusCode: number)
-    {
+                statusCode: number) {
+
         let message = `API response code: ${statusCode}`
         if (statusText !== undefined && statusText.length > 0)
             message = `${message}; Message: ${statusText}`

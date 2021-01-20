@@ -1,14 +1,17 @@
 
-export {EndpointsCoordinates, testCoordinates, sameCoordinates, coordinates} from "./classes/system/EndpointsCoordinates"
+export * from "./classes/system/EndpointsCoordinates"
 
-export {AuthenticationResponse, isAuthenticationResponse} from "./classes/comms/AuthenticationResponse"
-export {UploadResponse, isUploadResponse} from "./classes/comms/UploadResponse"
-export {ApiResponse, responseError, responseOk, responseUnauthorized} from "./classes/comms/ApiResponse"
-export {UploadRequest} from "./classes/comms/UploadRequest"
+export * from "./classes/api/AuthenticationBean"
 
-export {HttpException} from "./classes/exceptions/HttpException"
-export {AuthenticationException} from "./classes/exceptions/AuthenticationException"
+export * from "./classes/entities/AuthenticationResponse"
+export * from "./classes/entities/UploadResponse"
+export * from "./classes/entities/ApiResponse"
+export * from "./classes/entities/UploadRequest"
 
-export {pickDefined} from "./Utilities"
+export * from "./classes/exceptions/HttpException"
+export * from "./classes/exceptions/AuthenticationException"
 
-export {Statika} from "./Statika"
+export * from "./Utilities"
+
+export * from "./classes/api/Communicator"
+export * from "./Statika"

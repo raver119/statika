@@ -6,31 +6,31 @@ export type EndpointSchemaType = "http" | "https" | "same"
     1) Auth proxy endpoint
     2) Storage endpoint
  */
-export class EndpointsCoordinates {
-    constructor(public schema: EndpointSchemaType,
-                public hostname: string|undefined,
-                public port: number|string|undefined) {
-    }
+export const coordinates = (schema: EndpointSchemaType, host: string, port: number|string) => {
+    return {
+        schema: schema,
+        hostname: host,
+        port: port,
 
-    toString() :string {
-        if (this.schema === "same") {
-            // same FQDN + relative path will be used
-            return ""
-        } else {
-            let port = this.port === 80 ? "" : `:${this.port}`
-            return `${this.schema}://${this.hostname}${port}`
-        }
+        toString() :string {
+            if (schema === "same") {
+                // same FQDN + relative path will be used
+                return ""
+            } else {
+                let fport = port === 80 || port === "80" ? "" : `:${port}`
+                return `${schema}://${host}${fport}`
+            }
+        },
     }
 }
 
-export const coordinates = (schema: EndpointSchemaType, host: string, port: number|string, sch) => {
-    return new EndpointsCoordinates(schema, host, port)
-}
+export type EndpointsCoordinates = ReturnType<typeof coordinates>
 
 export const testCoordinates = (host: string, port: number|string) => {
-    return new EndpointsCoordinates("http", host, port)
+    return coordinates("http", host, port)
 }
 
 export const sameCoordinates = () => {
-    return new EndpointsCoordinates("same", undefined, undefined)
+    return coordinates("same", undefined, undefined)
 }
+
