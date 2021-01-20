@@ -63,12 +63,12 @@ func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) (
 	api := router.PathPrefix("/rest/v1").Subrouter()
 
 	// API endpoints
-	api.HandleFunc("/auth/upload", handlers.LoginUpload).Methods(http.MethodPost)
-	api.HandleFunc("/auth/master", handlers.LoginMaster).Methods(http.MethodPost)
-	api.HandleFunc("/ping", handlers.Ping).Methods(http.MethodGet, http.MethodPost)
-	api.HandleFunc("/file", handlers.Upload).Methods(http.MethodPost)
-	api.HandleFunc("/meta/{bucket}/{FileId}", handlers.GetMeta).Methods(http.MethodGet)
-	api.HandleFunc("/meta/{bucket}/{FileId}", handlers.UpdateMeta).Methods(http.MethodPost)
+	api.HandleFunc("/auth/upload", CorsHandler(handlers.LoginUpload)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/auth/master", CorsHandler(handlers.LoginMaster)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/ping", CorsHandler(handlers.Ping)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/file", CorsHandler(handlers.Upload)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/meta/{bucket}/{FileId}", CorsHandler(handlers.GetMeta)).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/meta/{bucket}/{FileId}", CorsHandler(handlers.UpdateMeta)).Methods(http.MethodPost, http.MethodOptions)
 
 	// catch-all handler for static files serving
 	catcher, err := NewCatcher(rootFolder, pa)
