@@ -44,8 +44,6 @@ func (srv *ApiHandler) validateUploadToken(r *http.Request, bucket string) (ok b
 	Login endpoint
 */
 func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
-	// CORS setup etc
-	SetupResponseHeaders(&w, r)
 	body, err := ioutil.ReadAll(r.Body)
 	if !OptionallyReport(w, err) {
 		return
@@ -84,27 +82,24 @@ func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *ApiHandler) LoginMaster(w http.ResponseWriter, r *http.Request) {
-	SetupResponseHeaders(&w, r)
+
 }
 
 /*
 	This method retrieves Meta information
 */
 func (srv *ApiHandler) GetMeta(w http.ResponseWriter, r *http.Request) {
-	SetupResponseHeaders(&w, r)
+
 }
 
 /*
 	This method updates Meta information
 */
 func (srv *ApiHandler) UpdateMeta(w http.ResponseWriter, r *http.Request) {
-	SetupResponseHeaders(&w, r)
+
 }
 
 func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
-	// CORS setup
-	SetupResponseHeaders(&w, r)
-
 	// validate authorization
 	if !srv.validateUploadToken(r, "") {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -117,9 +112,6 @@ func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
 
 // C
 func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
-	// CORS setup
-	SetupResponseHeaders(&w, r)
-
 	// read request
 	body, err := ioutil.ReadAll(r.Body)
 	if !OptionallyReport(w, err) {
@@ -167,10 +159,10 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 // TEST_U
 func (srv *ApiHandler) Update(w http.ResponseWriter, r *http.Request) {
-	SetupResponseHeaders(&w, r)
+
 }
 
 // D
 func (srv *ApiHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	SetupResponseHeaders(&w, r)
+
 }

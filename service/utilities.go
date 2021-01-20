@@ -71,11 +71,13 @@ func OptionallyReport(w http.ResponseWriter, err error) (ok bool) {
 /*
 	This function sets all required headers in HTTP response
 */
-func SetupResponseHeaders(w *http.ResponseWriter, req *http.Request) {
+func SetupCorsHeaders(w *http.ResponseWriter, req *http.Request) {
 	(*w).Header().Set("Access-Control-Allow-Origin", "*")
 	(*w).Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+}
 
+func SetupCacheHeaders(w *http.ResponseWriter, req *http.Request) {
 	// no-cache part
 	var epoch = time.Unix(0, 0).Format(time.RFC1123)
 	(*w).Header().Set("Expires", epoch)
@@ -99,4 +101,17 @@ func EncodePath(bucket string, fileName string) (b string, f string) {
 	}
 
 	return b, f
+}
+
+func CorsHandler(hf http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		SetupCacheHeaders(&w, r)
+		if r.Method == http.MethodOptions {
+			SetupCorsHeaders(&w, r)
+			// do nothing else
+		} else {
+			// pass request to the actual handler
+			hf.ServeHTTP(w, r)
+		}
+	}
 }
