@@ -105,11 +105,12 @@ func EncodePath(bucket string, fileName string) (b string, f string) {
 
 func CorsHandler(hf http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		SetupCacheHeaders(&w, r)
+		SetupCorsHeaders(&w, r)
 		if r.Method == http.MethodOptions {
-			SetupCorsHeaders(&w, r)
+
 			// do nothing else
 		} else {
+			SetupCacheHeaders(&w, r)
 			// pass request to the actual handler
 			hf.ServeHTTP(w, r)
 		}
