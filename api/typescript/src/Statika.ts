@@ -5,7 +5,7 @@ import {MetaApi, metaApi} from "./classes/api/MetaApi";
 import {StorageApi, storageApi} from "./classes/api/StorageApi";
 import {systemApi, SystemApi} from "./classes/api/SystemApi";
 
-
+// TODO: replace this type with proper semi-defined type here and in the backend
 export type MetaType = Map<string, string>|undefined
 
 export interface StatikaApi {

@@ -10,13 +10,14 @@ import {MetaType} from "../../Statika";
 export const storageApi = (communicator: Communicator) => {
     return {
         /**
-         *
+         * This method uploads given file to the server
          * @param bean
          * @param fileName - name of the file to be uploaded
          * @param f - ArrayBuffer with actual file content
          * @param metaInfo - optional string/string dictionary to be stored together with file
+         * @param options
          */
-        uploadFile(bean: AuthenticationBean, fileName: string, f: ArrayBuffer, metaInfo: MetaType = undefined) :Promise<UploadResponse> {
+        uploadFile(bean: AuthenticationBean, fileName: string, f: ArrayBuffer, metaInfo: MetaType = undefined, options = {}) :Promise<UploadResponse> {
             const req = bufferUploadRequest(bean.bucket, fileName, f, metaInfo)
             return communicator.post(bean, "/file", req).then(data => {
                 if (isUploadResponse(data))
@@ -26,7 +27,13 @@ export const storageApi = (communicator: Communicator) => {
             })
         },
 
-        deleteFile(bean: AuthenticationBean, fileName: string) :Promise<ApiResponse> {
+        /**
+         * This method deletes file from all backend servers.
+         * @param bean
+         * @param fileName
+         * @param options
+         */
+        deleteFile(bean: AuthenticationBean, fileName: string, options = {}) :Promise<ApiResponse> {
             const addr = communicator.storage().toString()
 
             if (!fileName.startsWith("/"))
@@ -40,7 +47,11 @@ export const storageApi = (communicator: Communicator) => {
             })
         },
 
-        listFiles() :Promise<ApiResponse> {
+        /**
+         * This method lists all uploaded files
+         * @param bean
+         */
+        listFiles(bean: AuthenticationBean) :Promise<ApiResponse> {
             return undefined
         },
     }
