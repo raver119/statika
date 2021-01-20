@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set up MemCached
-        uses: niden/actions-memcached@v7
+        run: docker run -d -it -p 11211:11211 memcached
 
       - name: Use Node.js 12.x
         uses: actions/setup-node@v1
@@ -48,9 +48,9 @@ jobs:
 
       - name: Typescript API step
         run: |
-          npm install
-          npm run build
-          npm run test:ci
+          yarn install --frozen-lockfile
+          yarn build
+          yarn test:ci
         working-directory: 'api/typescript/'
 
       - name: Golang API step

@@ -28,7 +28,7 @@ test("Upload.test_upload_1", async () => {
     let inst = Statika(testCoordinates(host, port))
 
     const buffer = enc.encode("test content")
-    const response = await inst.uploadFile(bean,"filename.txt", buffer).then(resp => {
+    const response = await inst.storage.uploadFile(bean,"filename.txt", buffer).then(resp => {
         expect(resp.filename).toBe(`/${TEST_BUCKET}/filename.txt`)
         return resp as UploadResponse
     })
@@ -43,7 +43,7 @@ test("Upload.test_upload_2", async () => {
     const buffer = enc.encode("test content")
 
     // empty filename is forbidden
-    await expect(inst.uploadFile(bean, "", buffer)).rejects.toThrow()
+    await expect(inst.storage.uploadFile(bean, "", buffer)).rejects.toThrow()
 })
 
 test("Upload.test_upload_3", async () => {
@@ -52,7 +52,7 @@ test("Upload.test_upload_3", async () => {
     const buffer = enc.encode("test content")
 
     // bad token, not authorized
-    await expect(inst.uploadFile(badTokenBean,"filename.txt", buffer)).rejects.toThrow()
+    await expect(inst.storage.uploadFile(badTokenBean,"filename.txt", buffer)).rejects.toThrow()
 })
 
 test("Upload.test_upload_4", async () => {
@@ -61,5 +61,5 @@ test("Upload.test_upload_4", async () => {
     const buffer = enc.encode("test content")
 
     // not your bucket not authorized
-    await expect(inst.uploadFile(badBucketBean,"filename.txt", buffer)).rejects.toThrow()
+    await expect(inst.storage.uploadFile(badBucketBean,"filename.txt", buffer)).rejects.toThrow()
 })

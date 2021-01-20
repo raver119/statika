@@ -1,8 +1,8 @@
-import {AuthenticationResponse} from "./comms/AuthenticationResponse";
-import {AuthenticationException} from "./exceptions/AuthenticationException";
-import {HttpException} from "./exceptions/HttpException";
-import {AuthenticationBean} from "./api/AuthenticationBean";
-import {EndpointsCoordinates} from "./system/EndpointsCoordinates";
+import {AuthenticationResponse} from "../entities/AuthenticationResponse";
+import {AuthenticationException} from "../exceptions/AuthenticationException";
+import {HttpException} from "../exceptions/HttpException";
+import {AuthenticationBean} from "./AuthenticationBean";
+import {EndpointsCoordinates} from "../system/EndpointsCoordinates";
 
 export type AuthType = AuthenticationBean | AuthenticationResponse
 

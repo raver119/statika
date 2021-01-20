@@ -26,19 +26,19 @@ beforeAll(async () => {
 test("Authentication.test_login_1", async () => {
     let inst = Statika(testCoordinates(host, port))
 
-    await expect(inst.ping(bean)).resolves.toStrictEqual({...responseOk()})
+    await expect(inst.system.ping(bean)).resolves.toStrictEqual({...responseOk()})
 })
 
 test("Authentication.test_login_2", async () => {
     let inst = Statika(testCoordinates(host, port))
 
 
-    await expect(inst.ping(badTokenBean)).rejects.toThrow()
+    await expect(inst.system.ping(badTokenBean)).rejects.toThrow()
 })
 
 test("Authentication.test_login_3", async () => {
     let inst = Statika(testCoordinates(host, port))
 
     // this test must pass since ping has nothing to do with actual storage
-    await expect(inst.ping(badBucketBean)).resolves.toStrictEqual({...responseOk()})
+    await expect(inst.system.ping(badBucketBean)).resolves.toStrictEqual({...responseOk()})
 })

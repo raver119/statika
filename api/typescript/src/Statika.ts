@@ -1,73 +1,41 @@
-import {isUploadResponse, UploadResponse} from "./classes/comms/UploadResponse";
-import {DatatypeException} from "./classes/exceptions/DatatypeException";
 import {EndpointsCoordinates} from "./classes/system/EndpointsCoordinates";
-import {ApiResponse, isApiResponse} from "./classes/comms/ApiResponse";
 import 'whatwg-fetch'
-import {bufferUploadRequest} from "./classes/comms/UploadRequest";
-import {communicator} from "./classes/Communicator";
-import {AuthenticationBean} from "./classes/api/AuthenticationBean";
+import {communicator} from "./classes/api/Communicator";
+import {MetaApi, metaApi} from "./classes/api/MetaApi";
+import {StorageApi, storageApi} from "./classes/api/StorageApi";
+import {systemApi, SystemApi} from "./classes/api/SystemApi";
 
 
 export type MetaType = Map<string, string>|undefined
 
-export const Statika = (coords: EndpointsCoordinates) => {
+export interface StatikaApi {
+    meta: MetaApi,
+    storage: StorageApi
+    system: SystemApi
+}
+
+/**
+ * This function creates an API instance
+ * @param coords - address of the Statika backend server
+ * @constructor
+ */
+export const Statika = (coords: EndpointsCoordinates) :StatikaApi  => {
     const comm = communicator(coords)
 
     return {
-        /**
-         *
-         * @param bean
-         * @param fileName - name of the file to be uploaded
-         * @param f - ArrayBuffer with actual file content
-         * @param metaInfo - optional string/string dictionary to be stored together with file
+        /*
+            APIs related to object meta information
          */
-        uploadFile(bean: AuthenticationBean, fileName: string, f: ArrayBuffer, metaInfo: MetaType = undefined) :Promise<UploadResponse> {
-            const req = bufferUploadRequest(bean.bucket, fileName, f, metaInfo)
-            return comm.post(bean, "/file", req).then(data => {
-                if (isUploadResponse(data))
-                    return data as UploadResponse
+        meta: metaApi(comm),
 
-                throw new DatatypeException("UploadResponse", data)
-            })
-        },
+        /*
+            Actual storage API: file upload, delete, listing etc
+         */
+        storage: storageApi(comm),
 
-        ping(bean: AuthenticationBean) :Promise<ApiResponse> {
-            return comm.get(bean, "/ping").then(data => {
-                if (isApiResponse(data))
-                    return data as ApiResponse
-
-                throw new DatatypeException("ApiResponse", data)
-            })
-        },
-
-        deleteFile(bean: AuthenticationBean, fileName: string) :Promise<ApiResponse> {
-            const addr = comm.storage().toString()
-
-            if (!fileName.startsWith("/"))
-                fileName = `/${fileName}`
-
-            return comm.delete(bean, `${addr}${fileName}`).then(data => {
-                if (isApiResponse(data))
-                    return data as ApiResponse
-
-                throw new DatatypeException("ApiResponse", data)
-            })
-        },
-
-        updateMetaInfo(fileName: string, metaInfo: MetaType = undefined) :Promise<ApiResponse> {
-            return undefined
-        },
-
-        getMetaInfo(fileName: string) :Promise<MetaType> {
-            return undefined
-        },
-
-        deleteMetaInfo(fileName: string) :Promise<ApiResponse> {
-            return undefined
-        },
-
-        listFiles() :Promise<ApiResponse> {
-            return undefined
-        },
+        /*
+            System functionality
+         */
+        system: systemApi(comm)
     }
 }
