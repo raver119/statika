@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -13,7 +14,7 @@ import (
 	"time"
 )
 
-const TEST_B = "my test bucket"
+const TEST_B = "my_test_bucket"
 const TEST_P = 8080
 
 /*
@@ -88,7 +89,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 	err = json.Unmarshal(resp.Body(), &uploadResp)
 	require.NoError(t, err)
 
-	assert.Equal(t, "/my+test+bucket/file+name.txt", uploadResp.FileName)
+	assert.Equal(t, "/my_test_bucket/file+name.txt", uploadResp.FileName)
 
 	// now, it should be possible to request file
 	r, err := http.Get(fmt.Sprintf("http://localhost:%v/%v", TEST_P, uploadResp.FileName))
@@ -187,6 +188,52 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	bytes, _ = ioutil.ReadAll(r.Body)
 	assert.Equal(t, http.StatusNotFound, r.StatusCode)
+
+	assert.NoError(t, engine.Stop())
+}
+
+func TestApiHandler_FormUpload(t *testing.T) {
+	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	require.NoError(t, err)
+
+	err = engine.StartAsync()
+	require.NoError(t, err)
+
+	time.Sleep(time.Second)
+
+	client := resty.New()
+	positiveAuthReq := UploadAuthenticationRequest{TEST_U, TEST_B}
+
+	ar, err := client.R().
+		SetBody(positiveAuthReq).
+		Post("http://localhost:8080/rest/v1/auth/upload")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, ar.StatusCode())
+
+	var authResp AuthenticationResponse
+	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
+
+	var content string = "another_file content"
+
+	ur, err := client.R().
+		SetFileReader("file", "another_file.txt", bytes.NewReader([]byte(content))).
+		SetFormData(map[string]string{
+			"token":  authResp.Token,
+			"bucket": TEST_B,
+		}).
+		Post("http://localhost:8080/rest/v1/file")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
+
+	var uploadResp UploadResponse
+	require.NoError(t, json.Unmarshal(ur.Body(), &uploadResp))
+
+	// test positive delete
+	dr, err := client.R().
+		SetAuthToken(authResp.Token).
+		Delete(fmt.Sprintf("http://localhost:8080%v", uploadResp.FileName))
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, dr.StatusCode())
 
 	assert.NoError(t, engine.Stop())
 }
