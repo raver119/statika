@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/resty.v1"
 	"io/ioutil"
 	"net/http"
@@ -19,14 +21,10 @@ const TEST_P = 8080
 */
 func TestApiHandler_LoginUpload(t *testing.T) {
 	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	err = engine.StartAsync()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	time.Sleep(time.Second)
 
 	client := resty.New()
@@ -40,34 +38,23 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 		SetBody(negativeAuthReq).
 		Post("http://localhost:8080/rest/v1/auth/upload")
 
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	if resp.StatusCode() != http.StatusUnauthorized {
-		t.Fatalf("unexpected status code: %v", resp.StatusCode())
-	}
-
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode())
 
 	// positive test
 	resp, err = client.R().
-					SetHeader("Accept", "application/json").
-					SetBody(positiveAuthReq).
-					Post("http://localhost:8080/rest/v1/auth/upload")
+		SetHeader("Accept", "application/json").
+		SetBody(positiveAuthReq).
+		Post("http://localhost:8080/rest/v1/auth/upload")
 
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	if resp.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v", resp.StatusCode())
-	}
+	assert.Equal(t, http.StatusOK, resp.StatusCode())
 
 	var authResp AuthenticationResponse
 	err = json.Unmarshal(resp.Body(), &authResp)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	fileContent := "file content"
 
@@ -85,9 +72,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 		SetBody(positiveUploadReq).
 		Post("http://localhost:8080/rest/v1/file")
 
-	if resp.StatusCode() != http.StatusUnauthorized {
-		t.Fatalf("unexpected status code: %v", resp.StatusCode())
-	}
+	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode())
 
 	// authorized file upload
 	resp, err = client.R().
@@ -95,52 +80,33 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 		SetAuthToken(authResp.Token).
 		SetBody(positiveUploadReq).
 		Post("http://localhost:8080/rest/v1/file")
+	require.NoError(t, err)
 
-	if resp.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v; body: %v", resp.StatusCode(), string(resp.Body()))
-	}
+	assert.Equal(t, http.StatusOK, resp.StatusCode())
 
 	var uploadResp UploadResponse
 	err = json.Unmarshal(resp.Body(), &uploadResp)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	if uploadResp.FileName != "/my+test+bucket/file+name.txt" {
-		t.Fatalf("unexpected file name after upload: [%v]", uploadResp.FileName)
-	}
+	assert.Equal(t, "/my+test+bucket/file+name.txt", uploadResp.FileName)
 
 	// now, it should be possible to request file
 	r, err := http.Get(fmt.Sprintf("http://localhost:%v/%v", TEST_P, uploadResp.FileName))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	bytes, _ := ioutil.ReadAll(r.Body)
-	if r.StatusCode != http.StatusOK {
-		t.Fatalf("unexpected status code: %v; Body: [%v]", r.StatusCode, string(bytes))
-	}
-
-	if fileContent != string(bytes) {
-		t.Fatalf("response file content doesn't match expectations: [%v]\n", string(bytes))
-	}
-
-	err = engine.Stop()
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Equal(t, http.StatusOK, r.StatusCode)
+	assert.Equal(t, fileContent, string(bytes))
+	require.NoError(t, engine.Stop())
 }
 
 func TestApiHandler_UpdateDelete(t *testing.T) {
 	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	err = engine.StartAsync()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	time.Sleep(time.Second)
 
 	client := resty.New()
@@ -148,19 +114,14 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 	positiveAuthReq := UploadAuthenticationRequest{TEST_U, TEST_B}
 
 	ar, err := client.R().
-						SetBody(positiveAuthReq).
-						Post("http://localhost:8080/rest/v1/auth/upload")
-	if err != nil {
-		t.Fatal(err)
-	}
+		SetBody(positiveAuthReq).
+		Post("http://localhost:8080/rest/v1/auth/upload")
+	require.NoError(t, err)
 
-	if ar.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v", ar.StatusCode())
-	}
+	assert.Equal(t, http.StatusOK, ar.StatusCode())
 
 	var authResp AuthenticationResponse
-	_ = json.Unmarshal(ar.Body(), &authResp)
-
+	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
 
 	originalContent := "my original content"
 	updatedContent := "my updated content"
@@ -173,22 +134,15 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 	}
 
 	ur, err := client.R().
-					SetAuthToken(authResp.Token).
-					SetBody(positiveUploadReq).
-					Post("http://localhost:8080/rest/v1/file")
-	if err != nil {
-		t.Fatal(err)
-	}
+		SetAuthToken(authResp.Token).
+		SetBody(positiveUploadReq).
+		Post("http://localhost:8080/rest/v1/file")
+	require.NoError(t, err)
 
-	if ur.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v", ur.StatusCode())
-	}
+	assert.Equal(t, http.StatusOK, ur.StatusCode())
 
 	var uploadResp UploadResponse
-	err = json.Unmarshal(ur.Body(), &uploadResp)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, json.Unmarshal(ur.Body(), &uploadResp))
 
 	// test update
 	positiveUploadReq = UploadRequest{
@@ -201,62 +155,38 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 		SetAuthToken(authResp.Token).
 		SetBody(positiveUploadReq).
 		Post("http://localhost:8080/rest/v1/file")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	if ur.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v", ur.StatusCode())
-	}
+	assert.Equal(t, http.StatusOK, ur.StatusCode())
+
 	// now make sure content is updated
 	r, err := http.Get(fmt.Sprintf("http://localhost:%v/%v", TEST_P, uploadResp.FileName))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	bytes, _ := ioutil.ReadAll(r.Body)
-	if r.StatusCode != http.StatusOK {
-		t.Fatalf("unexpected status code: %v; Body: [%v]", r.StatusCode, string(bytes))
-	}
-
-	if updatedContent != string(bytes) {
-		t.Fatalf("response file content doesn't match expectations: [%v]\n", string(bytes))
-	}
+	assert.Equal(t, http.StatusOK, r.StatusCode)
+	assert.Equal(t, updatedContent, string(bytes))
 
 	// test negative delete
 	dr, err := client.R().
 		Delete(fmt.Sprintf("http://localhost:8080%v", uploadResp.FileName))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if dr.StatusCode() != http.StatusUnauthorized {
-		t.Fatalf("unexpected status code: %v; Body: [%v]", dr.StatusCode(), string(dr.Body()))
-	}
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, dr.StatusCode())
 
 	// test positive delete
 	dr, err = client.R().
 		SetAuthToken(authResp.Token).
 		Delete(fmt.Sprintf("http://localhost:8080%v", uploadResp.FileName))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if dr.StatusCode() != http.StatusOK {
-		t.Fatalf("unexpected status code: %v; Body: [%v]", dr.StatusCode(), string(dr.Body()))
-	}
+	require.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, dr.StatusCode())
 
 	// file must be absent
 	r, err = http.Get(fmt.Sprintf("http://localhost:%v/%v", TEST_P, uploadResp.FileName))
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	bytes, _ = ioutil.ReadAll(r.Body)
-	if r.StatusCode != http.StatusNotFound {
-		t.Fatalf("unexpected status code: %v; Body: [%v]", r.StatusCode, string(bytes))
-	}
+	assert.Equal(t, http.StatusNotFound, r.StatusCode)
 
-	err = engine.Stop()
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.NoError(t, engine.Stop())
 }
