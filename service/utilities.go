@@ -58,11 +58,11 @@ func TransferBytes(r io.Reader, w io.Writer) error {
 	return nil
 }
 
-func OptionallyReport(w http.ResponseWriter, err error) (ok bool) {
+func OptionallyReport(message string, w http.ResponseWriter, err error) (ok bool) {
 	ok = err == nil
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(message + ": " + err.Error()))
 	}
 
 	return

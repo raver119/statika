@@ -5,11 +5,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/resty.v1"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 )
@@ -236,4 +238,59 @@ func TestApiHandler_FormUpload(t *testing.T) {
 	require.Equal(t, http.StatusOK, dr.StatusCode())
 
 	assert.NoError(t, engine.Stop())
+}
+
+func TestApiHandler_List(t *testing.T) {
+	randomBucket := uuid.New().String()
+
+	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	require.NoError(t, err)
+
+	err = engine.StartAsync()
+	require.NoError(t, err)
+
+	time.Sleep(time.Second)
+
+	client := resty.New()
+	positiveAuthReq := UploadAuthenticationRequest{TEST_U, randomBucket}
+
+	ar, err := client.R().
+		SetBody(positiveAuthReq).
+		Post("http://localhost:8080/rest/v1/auth/upload")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, ar.StatusCode())
+
+	var authResp AuthenticationResponse
+	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
+
+	ur, err := client.R().
+		SetFileReader("file", "file1.txt", strings.NewReader("pew-pew-zomg")).
+		SetFormData(map[string]string{
+			"token":  authResp.Token,
+			"bucket": randomBucket,
+		}).
+		Post("http://localhost:8080/rest/v1/file")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
+
+	ur, err = client.R().
+		SetFileReader("file", "file2.txt", strings.NewReader("pew-pew-zomg")).
+		SetFormData(map[string]string{
+			"token":  authResp.Token,
+			"bucket": randomBucket,
+		}).
+		Post("http://localhost:8080/rest/v1/file")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
+
+	lr, err := client.R().
+		SetAuthToken(authResp.Token).
+		Get(fmt.Sprintf("http://localhost:8080/rest/v1/files/%v", randomBucket))
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, lr.StatusCode(), string(lr.Body()))
+
+	var listResp ListResponse
+	require.NoError(t, json.Unmarshal(lr.Body(), &listResp))
+	require.Equal(t, randomBucket, listResp.Bucket)
+	require.Equal(t, []FileEntry{{FileName: "file1.txt"}, {FileName: "file2.txt"}}, listResp.Files)
 }

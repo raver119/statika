@@ -51,3 +51,30 @@ func (c Client) DeleteFile(fileName string) (err error) {
 
 	return
 }
+
+func (c Client) ListFiles() (f []FileEntry, err error) {
+	response, err := c.resty.R().
+		SetAuthToken(string(c.uploadToken)).
+		Get(fmt.Sprintf("%v/rest/v1/files/%v", c.endpoint, c.bucket))
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode() != http.StatusOK {
+		err = fmt.Errorf("http request returned unexpected error code: %v", response.StatusCode())
+		return
+	}
+
+	var listResp ListResponse
+	err = json.Unmarshal(response.Body(), &listResp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range listResp.Files {
+		f = append(f, FileEntry{FileName: fmt.Sprintf("%v/%v/%v", c.endpoint, c.bucket, v.FileName)})
+	}
+
+	return
+}

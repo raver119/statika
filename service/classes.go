@@ -7,9 +7,9 @@ import (
 )
 
 type Storage interface {
-	// must be a stream instead
 	Put(bucket string, name string, r io.Reader) (string, error)
 	Get(bucket string, name string) (CloseableReader, error)
+	List(bucket string) (f []FileEntry, err error)
 	Delete(bucket string, name string) error
 }
 
@@ -52,9 +52,23 @@ type UploadResponse struct {
 	FileName string `json:"filename"`
 }
 
+type ListResponse struct {
+	Bucket string      `json:"bucket"`
+	Files  []FileEntry `json:"files"`
+}
+
+func (lr ListResponse) ToJSON() []byte {
+	js, _ := json.Marshal(lr)
+	return js
+}
+
 func (ur UploadResponse) ToJSON() []byte {
 	js, _ := json.Marshal(ur)
 	return js
+}
+
+type FileEntry struct {
+	FileName string `json:"filename"`
 }
 
 type UpdateMetaRequest struct {

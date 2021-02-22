@@ -51,3 +51,23 @@ func TestLocalStorage_Delete(t *testing.T) {
 	require.NoError(t, err)
 	require.NoFileExists(t, "/tmp/"+f)
 }
+
+func TestLocalStorage_List(t *testing.T) {
+	bucket := "random_bucket_name"
+	testString := "test string"
+	ls := NewLocalStorage("/tmp")
+
+	input := strings.NewReader(testString)
+	_, err := ls.Put(bucket, "test1.txt", input)
+	require.NoError(t, err)
+
+	_, err = ls.Put(bucket, "test2.txt", input)
+	require.NoError(t, err)
+
+	files, err := ls.List(bucket)
+	require.NoError(t, err)
+	assert.Equal(t, []FileEntry{{FileName: "test1.txt"}, {FileName: "test2.txt"}}, files)
+
+	assert.NoError(t, ls.Delete(bucket, "test1.txt"))
+	assert.NoError(t, ls.Delete(bucket, "test2.txt"))
+}

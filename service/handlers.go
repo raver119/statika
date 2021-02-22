@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -49,14 +50,14 @@ func (srv *ApiHandler) validateUploadToken(r *http.Request, bucket string) (ok b
 */
 func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
-	if !OptionallyReport(w, err) {
+	if !OptionallyReport("unable to read message body", w, err) {
 		return
 	}
 
 	// deserialize request
 	var req UploadAuthenticationRequest
 	err = json.Unmarshal(body, &req)
-	if !OptionallyReport(w, err) {
+	if !OptionallyReport("unable to deserialize UploadAuthenticationRequest", w, err) {
 		return
 	}
 
@@ -71,7 +72,7 @@ func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 
 	// create upload token
 	token, err := srv.pa.CreateUploadToken(req)
-	if !OptionallyReport(w, err) {
+	if !OptionallyReport("unable to create upload token", w, err) {
 		return
 	}
 
@@ -116,7 +117,7 @@ func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
 
 func (srv *ApiHandler) processUpload(bucket string, fileName string, reader io.Reader, w http.ResponseWriter) (ur UploadResponse, err error) {
 	_, err = srv.storage.Put(bucket, fileName, reader)
-	if !OptionallyReport(w, err) {
+	if !OptionallyReport("put failed", w, err) {
 		return
 	}
 
@@ -144,7 +145,7 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		file, fileHeader, err := r.FormFile("file")
-		if !OptionallyReport(w, err) {
+		if !OptionallyReport("failed to fetch file from the form", w, err) {
 			return
 		}
 
@@ -157,14 +158,14 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	} else {
 		// read request
 		body, err := ioutil.ReadAll(r.Body)
-		if !OptionallyReport(w, err) {
+		if !OptionallyReport("failed to read body", w, err) {
 			return
 		}
 
 		// deserialize request
 		var req UploadRequest
 		err = json.Unmarshal(body, &req)
-		if !OptionallyReport(w, err) {
+		if !OptionallyReport("failed to deserialized UploadRequest", w, err) {
 			return
 		}
 
@@ -185,7 +186,7 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 		// if everything is ok - store the file
 		b, err := base64.StdEncoding.DecodeString(req.Payload)
-		if !OptionallyReport(w, err) {
+		if !OptionallyReport("unable to decode payload", w, err) {
 			return
 		}
 
@@ -201,4 +202,29 @@ func (srv *ApiHandler) Update(w http.ResponseWriter, r *http.Request) {
 // D
 func (srv *ApiHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func (srv *ApiHandler) List(w http.ResponseWriter, r *http.Request) {
+	bucket := mux.Vars(r)["bucket"]
+	if !srv.validateUploadToken(r, bucket) {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	entries, err := srv.storage.List(bucket)
+	if !OptionallyReport("unable to list bucket", w, err) {
+		return
+	}
+
+	// TODO: decide if the full path really preferred here
+	//for i, v := range entries {
+	//	entries[i].FileName = fmt.Sprintf("/%v/%v", bucket, v.FileName)
+	//}
+
+	var response = ListResponse{
+		Bucket: bucket,
+		Files:  entries,
+	}
+
+	_, _ = w.Write(response.ToJSON())
 }

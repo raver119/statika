@@ -16,3 +16,12 @@ type UploadResponse struct {
 	Id       string `json:"id"`
 	FileName string `json:"filename"`
 }
+
+type FileEntry struct {
+	FileName string `json:"filename"`
+}
+
+type ListResponse struct {
+	Bucket string      `json:"bucket"`
+	Files  []FileEntry `json:"files"`
+}
