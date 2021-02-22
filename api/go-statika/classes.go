@@ -11,3 +11,8 @@ type AuthenticationResponse struct {
 }
 
 type UploadToken string
+
+type UploadResponse struct {
+	Id       string `json:"id"`
+	FileName string `json:"filename"`
+}

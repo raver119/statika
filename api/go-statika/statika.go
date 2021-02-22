@@ -19,19 +19,32 @@ type GateKeeper struct {
 }
 
 /*
-	This function creates new Statika client
+	This function creates new Statika GateKeeper client, it's responsible
 
 */
-func New(endpoint string, masterKey string, uploadKey string) (c *GateKeeper, err error) {
+func New(endpoint string, masterKey string, uploadKey string) (GateKeeper, error) {
 	rc := resty.New()
 
-	c = &GateKeeper{
+	return GateKeeper{
 		restClient: rc,
 		endpoint:   endpoint,
 		masterKey:  masterKey,
 		uploadKey:  uploadKey,
+	}, nil
+}
+
+func (gk GateKeeper) BuildClient(bucket string) (Client, error) {
+	token, err := gk.IssueUploadToken(bucket)
+	if err != nil {
+		return Client{}, err
 	}
-	return
+
+	return Client{
+		uploadToken: token,
+		bucket:      bucket,
+		endpoint:    gk.endpoint,
+		resty:       resty.New(),
+	}, nil
 }
 
 func (gk GateKeeper) IssueUploadToken(bucket string) (token UploadToken, err error) {

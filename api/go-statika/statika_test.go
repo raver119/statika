@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	endpoint  = "http://localhost:8080"
-	masterKey = "TEST_MASTER_KEY"
-	uploadKey = "TEST_UPLOAD_KEY"
+	endpoint   = "http://localhost:9191"
+	masterKey  = "TEST_MASTER_KEY"
+	uploadKey  = "TEST_UPLOAD_KEY"
+	testBucket = "bucket_for_tests"
 )
 
 func TestGateKeeper_IssueUploadToken(t *testing.T) {
