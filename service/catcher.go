@@ -23,9 +23,15 @@ func NewCatcher(root string, pa PersistenceAgent) (c Catcher, err error) {
 	3) Handles DELETE requests
 */
 func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	// only GET is supported
+	// only GET/DELETE is supported
 	if r.Method != http.MethodGet && r.Method != http.MethodDelete {
 		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// direct access to metainfo files is forbidden
+	if strings.HasSuffix(r.URL.Path, META_EXTENSION) {
+		w.WriteHeader(http.StatusForbidden)
 		return
 	}
 
@@ -39,12 +45,6 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	bucket := parts[1]
 	fileName := parts[2]
-
-	// direct access to metainfo files is forbidden
-	if strings.HasSuffix(fileName, ".statika_metainfo") {
-		w.WriteHeader(http.StatusUnauthorized)
-		return
-	}
 
 	if r.Method == http.MethodGet {
 		// read file from storage & validate it actually exists

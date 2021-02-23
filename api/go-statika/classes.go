@@ -18,7 +18,8 @@ type UploadResponse struct {
 }
 
 type FileEntry struct {
-	FileName string `json:"filename"`
+	FileName string            `json:"filename"`
+	Meta     map[string]string `json:"meta"`
 }
 
 type ListResponse struct {
