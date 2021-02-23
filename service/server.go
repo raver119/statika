@@ -67,6 +67,7 @@ func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) (
 	api.HandleFunc("/auth/master", CorsHandler(handlers.LoginMaster)).Methods(http.MethodPost, http.MethodOptions)
 	api.HandleFunc("/ping", CorsHandler(handlers.Ping)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
 	api.HandleFunc("/file", CorsHandler(handlers.Upload)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/files/{bucket}", CorsHandler(handlers.List)).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/meta/{bucket}/{FileId}", CorsHandler(handlers.GetMeta)).Methods(http.MethodGet, http.MethodOptions)
 	api.HandleFunc("/meta/{bucket}/{FileId}", CorsHandler(handlers.UpdateMeta)).Methods(http.MethodPost, http.MethodOptions)
 

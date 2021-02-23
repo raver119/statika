@@ -55,7 +55,11 @@ func (a PersistenceAgent) CreateMasterToken(req UploadAuthenticationRequest) (au
 func (a PersistenceAgent) CheckUploadToken(authToken string, bucket string) bool {
 	encAuthToken := base64.StdEncoding.EncodeToString([]byte(a.normalizeToken(authToken)))
 	b, err := a.memCached.Get(PrefixUpload + encAuthToken)
-	if err != nil || b == nil || bucket != string(b.Value) {
+	if err != nil {
+		return false
+	}
+	allowedBucket := string(b.Value)
+	if b == nil || bucket != allowedBucket {
 		return false
 	}
 

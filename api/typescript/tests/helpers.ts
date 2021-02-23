@@ -4,7 +4,7 @@ import {DatatypeException} from "../src/classes/exceptions/DatatypeException";
 
 export const authorizeUpload = async (uploadKey: string, bucket: string) :Promise<string> => {
     const host = pickDefined(process.env.API_NODE, "127.0.0.1")
-    const port = pickDefined(process.env.API_PORT, "8080")
+    const port = pickDefined(process.env.API_PORT, "9191")
 
     return fetch(`http://${host}:${port}/rest/v1/auth/upload`, {
         method: 'POST',

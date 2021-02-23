@@ -32,9 +32,9 @@ func main() {
 	}
 
 	/*
-		By default port 80 is used
+		By default port 8080 is used
 	*/
-	strPort := GetEnvOrDefault("STATIKA_PORT", "8080")
+	strPort := GetEnvOrDefault("STATIKA_PORT", "9191")
 	port, err := strconv.Atoi(strPort)
 	if err != nil {
 		panic(err)

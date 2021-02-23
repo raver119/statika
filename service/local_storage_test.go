@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"strings"
 	"testing"
@@ -10,31 +12,17 @@ func TestLocalStorage_Get(t *testing.T) {
 	testString := "test string"
 	ls := NewLocalStorage("/tmp")
 	input := strings.NewReader(testString)
-	_, err := ls.Put("","test.txt", input)
+	_, err := ls.Put("", "test.txt", input)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to Put file: %v", err.Error())
-	}
+	defer ls.Delete("", "test.txt")
 
-	r, err := ls.Get("","test.txt")
-	if err != nil {
-		t.Fatalf("failed to Put file: %v", err.Error())
-	}
+	r, err := ls.Get("", "test.txt")
+	assert.NoError(t, err)
 
 	bytes, err := ioutil.ReadAll(r)
-	if testString != string(bytes) {
-		t.Fatalf("strings do not match:\nExpected: <%v>;\nActual: <%v>\n", testString, string(bytes))
-	}
-
-	err = r.Close()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = ls.Delete("","test.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Equal(t, testString, string(bytes))
+	assert.NoError(t, r.Close())
 }
 
 func TestLocalStorage_Put(t *testing.T) {
@@ -42,41 +30,44 @@ func TestLocalStorage_Put(t *testing.T) {
 	ls := NewLocalStorage("/tmp")
 	input := strings.NewReader(testString)
 	f, err := ls.Put("", "test.txt", input)
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to Put file: %v", err.Error())
-	}
+	defer ls.Delete("", "test.txt")
 
-	if !FileExists("/tmp/" + f, true) {
-		t.Fatalf("file doesn't exist after Put")
-	}
+	require.FileExists(t, "/tmp/"+f)
 
 	bytes, err := ioutil.ReadFile("/tmp/" + f)
+	require.NoError(t, err)
 
-	if testString != string(bytes) {
-		t.Fatalf("strings do not match:\nExpected: <%v>;\nActual: <%v>\n", testString, string(bytes))
-	}
-
-	err = ls.Delete("", "test.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
+	assert.Equal(t, testString, string(bytes))
 }
 
 func TestLocalStorage_Delete(t *testing.T) {
 	ls := NewLocalStorage("/tmp")
 	f, err := ls.Put("", "test2.txt", strings.NewReader("some content"))
+	require.NoError(t, err)
 
-	if err != nil {
-		t.Fatalf("failed to Put file: %v", err.Error())
-	}
+	err = ls.Delete("", "test2.txt")
+	require.NoError(t, err)
+	require.NoFileExists(t, "/tmp/"+f)
+}
 
-	err = ls.Delete("","test2.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
+func TestLocalStorage_List(t *testing.T) {
+	bucket := "random_bucket_name"
+	testString := "test string"
+	ls := NewLocalStorage("/tmp")
 
-	if FileExists("/tmp/" + f, true) {
-		t.Fatalf("file still exists after delete")
-	}
+	input := strings.NewReader(testString)
+	_, err := ls.Put(bucket, "test1.txt", input)
+	require.NoError(t, err)
+
+	_, err = ls.Put(bucket, "test2.txt", input)
+	require.NoError(t, err)
+
+	files, err := ls.List(bucket)
+	require.NoError(t, err)
+	assert.Equal(t, []FileEntry{{FileName: "test1.txt"}, {FileName: "test2.txt"}}, files)
+
+	assert.NoError(t, ls.Delete(bucket, "test1.txt"))
+	assert.NoError(t, ls.Delete(bucket, "test2.txt"))
 }

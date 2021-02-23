@@ -17,6 +17,11 @@ jobs:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.16
+
       - name: Set up MemCached
         run: docker run -d -it -p 11211:11211 memcached
 
@@ -42,7 +47,7 @@ jobs:
           MASTER_KEY: TEST_MASTER_KEY
           UPLOAD_KEY: TEST_UPLOAD_KEY
           ROOT_DIR: /tmp
-          STATIKA_PORT: 8080
+          STATIKA_PORT: 9191
         run: ./service 1>/dev/null 2>/dev/null &
         working-directory: 'service/'
 

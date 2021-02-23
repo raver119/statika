@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -11,17 +12,11 @@ const (
 
 func TestServer_StartStop(t *testing.T) {
 	eng, err := CreateEngine(TEST_M, TEST_U, "/tmp", 80)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	err = eng.StartAsync()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	err = eng.Stop()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 }

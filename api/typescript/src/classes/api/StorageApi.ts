@@ -5,6 +5,7 @@ import {bufferUploadRequest} from "../entities/UploadRequest";
 import {DatatypeException} from "../exceptions/DatatypeException";
 import {ApiResponse, isApiResponse} from "../entities/ApiResponse";
 import {MetaType} from "../../Statika";
+import {ListResponse} from "../entities/ListResponse";
 
 
 export const storageApi = (communicator: Communicator) => {
@@ -51,8 +52,8 @@ export const storageApi = (communicator: Communicator) => {
          * This method lists all uploaded files
          * @param bean
          */
-        listFiles(bean: AuthenticationBean) :Promise<ApiResponse> {
-            return undefined
+        listFiles(bean: AuthenticationBean) :Promise<ListResponse> {
+            return communicator.get(bean, `/files/${bean.bucket}`)
         },
     }
 }
