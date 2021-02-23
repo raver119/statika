@@ -294,3 +294,59 @@ func TestApiHandler_List(t *testing.T) {
 	require.Equal(t, randomBucket, listResp.Bucket)
 	require.Equal(t, []FileEntry{{FileName: "file1.txt"}, {FileName: "file2.txt"}}, listResp.Files)
 }
+
+func TestApiHandler_Meta(t *testing.T) {
+	randomBucket := uuid.New().String()
+
+	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	require.NoError(t, err)
+
+	err = engine.StartAsync()
+	require.NoError(t, err)
+
+	time.Sleep(time.Second)
+
+	client := resty.New()
+	positiveAuthReq := UploadAuthenticationRequest{TEST_U, randomBucket}
+
+	ar, err := client.R().
+		SetBody(positiveAuthReq).
+		Post("http://localhost:8080/rest/v1/auth/upload")
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, ar.StatusCode())
+
+	var authResp AuthenticationResponse
+	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
+
+	meta := MetaInfo{
+		"alpha": "1",
+		"beta":  "2",
+	}
+
+	fileName := "some_file.txt"
+
+	pm, err := client.R().
+		SetAuthToken(authResp.Token).
+		SetBody(meta).
+		Post(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, pm.StatusCode())
+
+	gm, err := client.R().
+		SetAuthToken(authResp.Token).
+		SetBody(meta).
+		Get(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, gm.StatusCode())
+
+	var restored MetaInfo
+	require.NoError(t, json.Unmarshal(gm.Body(), &restored))
+	assert.Equal(t, meta, restored)
+
+	dm, err := client.R().
+		SetAuthToken(authResp.Token).
+		SetBody(meta).
+		Delete(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, dm.StatusCode())
+}

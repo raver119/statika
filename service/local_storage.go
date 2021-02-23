@@ -117,7 +117,7 @@ func (s LocalStorage) List(bucket string) (f []FileEntry, err error) {
 		f = append(f, FileEntry{FileName: string(dec) + "." + ext})
 	}
 
-	// output will be alpha-sorted, always
+	// TODO: make optional sort-by-date, alpha-sort etc.
 	sort.Slice(f, func(i, j int) bool {
 		return f[i].FileName < f[j].FileName
 	})
