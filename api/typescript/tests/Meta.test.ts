@@ -40,5 +40,6 @@ test("Meta.test_meta_crd", async () => {
 
     await expect(s.meta.deleteMetaInfo(bean, fileName)).resolves.toBeDefined()
 
-    await expect(s.meta.getMetaInfo(bean, fileName)).rejects.toThrow()
+    const empty =  await s.meta.getMetaInfo(bean, fileName)
+    expect(empty).toStrictEqual(metaInfo([]))
 })
