@@ -12,7 +12,7 @@ const TEST_BUCKET = "test_bucket"
 const EVIL_BUCKET = "evil_bucket"
 
 const host = pickDefined(process.env.API_NODE, "127.0.0.1")
-const port = pickDefined(process.env.API_PORT, "8080")
+const port = pickDefined(process.env.API_PORT, "9191")
 
 const enc = new TextEncoder()
 let goodBean: AuthenticationBean

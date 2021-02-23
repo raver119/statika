@@ -1,7 +1,6 @@
 package statika
 
 import (
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -62,7 +61,5 @@ func TestClient_ListFiles(t *testing.T) {
 	files, err := client.ListFiles()
 	require.NoError(t, err)
 
-	// i.e. http://localhost:9191/bucket_name/file5.txt
-	p := fmt.Sprintf("http://localhost:9191/%v/", testBucket)
-	require.Equal(t, []FileEntry{{p + "file5.txt"}, {p + "file6.txt"}}, files)
+	require.Equal(t, []FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
 }

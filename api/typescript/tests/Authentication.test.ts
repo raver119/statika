@@ -10,7 +10,7 @@ const UPLOAD_KEY = "TEST_UPLOAD_KEY"
 const TEST_BUCKET = "test_bucket"
 
 const host = pickDefined(process.env.API_NODE, "127.0.0.1")
-const port = pickDefined(process.env.API_PORT, "8080")
+const port = pickDefined(process.env.API_PORT, "9191")
 
 let uploadToken: string
 let bean: AuthenticationBean

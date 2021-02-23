@@ -73,7 +73,7 @@ func (c Client) ListFiles() (f []FileEntry, err error) {
 	}
 
 	for _, v := range listResp.Files {
-		f = append(f, FileEntry{FileName: fmt.Sprintf("%v/%v/%v", c.endpoint, c.bucket, v.FileName)})
+		f = append(f, FileEntry{FileName: v.FileName})
 	}
 
 	return
