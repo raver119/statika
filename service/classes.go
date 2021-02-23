@@ -76,8 +76,7 @@ func (ur UploadResponse) ToJSON() []byte {
 }
 
 type FileEntry struct {
-	FileName string   `json:"filename"`
-	Meta     MetaInfo `json:"meta"`
+	FileName string `json:"filename"`
 }
 
 type UpdateMetaRequest struct {

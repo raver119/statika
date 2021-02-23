@@ -66,7 +66,6 @@ func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 	// make sure this is authorized request
 	if srv.userKey != req.Token {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(fmt.Sprintf("expected token: [%v]; actual token: [%v]", srv.userKey, req.Token)))
 		return
 	}
 

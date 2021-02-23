@@ -159,8 +159,7 @@ func (s LocalStorage) GetMeta(bucket string, filename string) (meta MetaInfo, er
 
 	path := fmt.Sprintf("%v/%v", s.rootFolder, bf)
 	if !FileExists(path, true) {
-		err = fmt.Errorf("requested file doesn't exist: [%v/%v]", bucket, path)
-		return
+		return map[string]string{}, err
 	}
 
 	reader, err := os.Open(path)

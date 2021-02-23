@@ -93,5 +93,6 @@ func TestLocalStorage_GetMeta(t *testing.T) {
 	require.NoError(t, ls.DeleteMeta(bucket, fileName))
 
 	restored, err = ls.GetMeta(bucket, fileName)
-	require.Error(t, err)
+	require.NoError(t, err)
+	require.Equal(t, MetaInfo{}, restored)
 }

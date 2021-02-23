@@ -12,10 +12,10 @@ import (
 
 func TestClient_UploadFile(t *testing.T) {
 	testBucket := uuid.New().String()
-	gk, err := New(endpoint, masterKey, uploadKey)
+	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
-	client, err := gk.BuildClient(testBucket)
+	client, err := gk.IssueClient(testBucket)
 	require.NoError(t, err)
 
 	content := "random text content"
@@ -44,10 +44,13 @@ func TestClient_UploadFile(t *testing.T) {
 
 func TestClient_ListFiles(t *testing.T) {
 	testBucket := uuid.New().String()
-	gk, err := New(endpoint, masterKey, uploadKey)
+	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
-	client, err := gk.BuildClient(testBucket)
+	token, err := gk.IssueUploadToken(testBucket)
+	require.NoError(t, err)
+
+	client, err := gk.NewClient(testBucket, token)
 	require.NoError(t, err)
 
 	content := "random text content"
@@ -62,4 +65,31 @@ func TestClient_ListFiles(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, []FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
+}
+
+func TestClient_Meta(t *testing.T) {
+	testBucket := uuid.New().String()
+	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
+	require.NoError(t, err)
+
+	client, err := gk.IssueClient(testBucket)
+	require.NoError(t, err)
+
+	meta := MetaInfo{
+		"alpha": "1",
+		"beta":  "2",
+	}
+
+	require.NoError(t, client.SetMeta("file5.txt", meta))
+
+	restored, err := client.GetMeta("file5.txt")
+	require.NoError(t, err)
+	assert.Equal(t, meta, restored)
+
+	require.NoError(t, client.DeleteMeta("file5.txt"))
+
+	// must be empty map
+	restored, err = client.GetMeta("file5.txt")
+	require.NoError(t, err)
+	assert.Equal(t, MetaInfo{}, restored)
 }

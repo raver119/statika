@@ -22,7 +22,7 @@ type GateKeeper struct {
 	This function creates new Statika GateKeeper client, it's responsible
 
 */
-func New(endpoint string, masterKey string, uploadKey string) (GateKeeper, error) {
+func NewGateKeeper(endpoint string, masterKey string, uploadKey string) (GateKeeper, error) {
 	rc := resty.New()
 
 	return GateKeeper{
