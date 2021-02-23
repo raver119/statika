@@ -12,7 +12,7 @@ const (
 )
 
 func TestGateKeeper_IssueUploadToken(t *testing.T) {
-	gk, err := New(endpoint, masterKey, uploadKey)
+	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
 	_, err = gk.IssueUploadToken("test_bucket")
@@ -20,7 +20,7 @@ func TestGateKeeper_IssueUploadToken(t *testing.T) {
 }
 
 func TestGateKeeper_IssueUploadToken_2(t *testing.T) {
-	gk, err := New(endpoint, masterKey, "bad key")
+	gk, err := NewGateKeeper(endpoint, masterKey, "bad key")
 	require.NoError(t, err)
 
 	_, err = gk.IssueUploadToken("test_bucket")

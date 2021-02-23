@@ -6,11 +6,19 @@ import (
 	"net/http"
 )
 
+const META_EXTENSION = ".statika_metainfo"
+
+type MetaInfo map[string]string
+
 type Storage interface {
 	Put(bucket string, name string, r io.Reader) (string, error)
 	Get(bucket string, name string) (CloseableReader, error)
 	List(bucket string) (f []FileEntry, err error)
 	Delete(bucket string, name string) error
+
+	PutMeta(bucket string, filename string, meta MetaInfo) (err error)
+	GetMeta(bucket string, filename string) (meta MetaInfo, err error)
+	DeleteMeta(bucket string, filename string) (err error)
 }
 
 type CloseableReader interface {
@@ -72,9 +80,9 @@ type FileEntry struct {
 }
 
 type UpdateMetaRequest struct {
-	Id     string            `json:"id"`
-	Bucket string            `json:"bucket"`
-	Meta   map[string]string `json:"meta"`
+	Id     string   `json:"id"`
+	Bucket string   `json:"bucket"`
+	Meta   MetaInfo `json:"meta"`
 }
 
 type ApiResponse struct {

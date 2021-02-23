@@ -66,7 +66,6 @@ func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 	// make sure this is authorized request
 	if srv.userKey != req.Token {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(fmt.Sprintf("expected token: [%v]; actual token: [%v]", srv.userKey, req.Token)))
 		return
 	}
 
@@ -94,14 +93,61 @@ func (srv *ApiHandler) LoginMaster(w http.ResponseWriter, r *http.Request) {
 	This method retrieves Meta information
 */
 func (srv *ApiHandler) GetMeta(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	bucket := vars["bucket"]
+	fileName := vars["fileName"]
 
+	// TODO: check meta file existence first, 404 would be more informative
+	meta, err := srv.storage.GetMeta(bucket, fileName)
+	if !OptionallyReport("failed to get meta", w, err) {
+		return
+	}
+
+	b, _ := json.Marshal(meta)
+	_, _ = w.Write(b)
 }
 
 /*
 	This method updates Meta information
 */
-func (srv *ApiHandler) UpdateMeta(w http.ResponseWriter, r *http.Request) {
+func (srv *ApiHandler) SetMeta(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	bucket := vars["bucket"]
+	fileName := vars["fileName"]
 
+	body, err := ioutil.ReadAll(r.Body)
+	if !OptionallyReport("failed to read body", w, err) {
+		return
+	}
+
+	var meta MetaInfo
+	err = json.Unmarshal(body, &meta)
+	if !OptionallyReport("failed to deserialize meta", w, err) {
+		return
+	}
+
+	err = srv.storage.PutMeta(bucket, fileName, meta)
+	if !OptionallyReport("failed to store meta", w, err) {
+		return
+	}
+
+	_, _ = w.Write(responseOK())
+}
+
+/*
+	This method removes Meta information
+*/
+func (srv *ApiHandler) DeleteMeta(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	bucket := vars["bucket"]
+	fileName := vars["fileName"]
+
+	err := srv.storage.DeleteMeta(bucket, fileName)
+	if !OptionallyReport("failed to delete meta", w, err) {
+		return
+	}
+
+	_, _ = w.Write(responseOK())
 }
 
 func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {

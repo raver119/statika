@@ -6,7 +6,18 @@ import {StorageApi, storageApi} from "./classes/api/StorageApi";
 import {systemApi, SystemApi} from "./classes/api/SystemApi";
 
 // TODO: replace this type with proper semi-defined type here and in the backend
-export type MetaType = Map<string, string>|undefined
+export type MetaType = Map<string, string>
+
+export const metaInfo = (values: {k: string, v: string}[]) :MetaType => {
+    const m = new Map<string, string>()
+    values.forEach(p => m.set(p.k, p.v))
+    return m
+}
+
+export const pair = (k: string, v: string) => ({
+    k: k,
+    v: v,
+})
 
 export interface StatikaApi {
     meta: MetaApi,
