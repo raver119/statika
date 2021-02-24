@@ -11,6 +11,7 @@ import (
 	"gopkg.in/resty.v1"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -349,4 +350,10 @@ func TestApiHandler_Meta(t *testing.T) {
 		Delete(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, dm.StatusCode())
+}
+
+func TestApiHandler_Decode(t *testing.T) {
+	decoded, err := url.QueryUnescape("cmF2ZXIxMTk%3D")
+	require.NoError(t, err)
+	require.Equal(t, "cmF2ZXIxMTk=", decoded)
 }

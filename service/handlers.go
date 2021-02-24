@@ -61,8 +61,6 @@ func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	req.Bucket = url.QueryEscape(req.Bucket)
-
 	// make sure this is authorized request
 	if srv.userKey != req.Token {
 		w.WriteHeader(http.StatusUnauthorized)
