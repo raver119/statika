@@ -10,6 +10,7 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strings"
 )
 
 var reName = regexp.MustCompile("\\..*?$")
@@ -100,7 +101,7 @@ func (s LocalStorage) List(bucket string) (f []FileEntry, err error) {
 
 	for _, v := range files {
 		// FIXME: reconsider this eventually
-		if v.IsDir() {
+		if v.IsDir() || strings.HasSuffix(v.Name(), META_EXTENSION) {
 			continue
 		}
 
