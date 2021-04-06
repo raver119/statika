@@ -24,7 +24,8 @@ const TEST_P = 9191
 	This test validates login + file upload procedure
 */
 func TestApiHandler_LoginUpload(t *testing.T) {
-	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	var ls Storage = NewLocalStorage("/tmp")
+	engine, err := CreateEngine(TEST_M, TEST_U, &ls, TEST_P)
 	require.NoError(t, err)
 
 	err = engine.StartAsync()
@@ -105,7 +106,8 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 }
 
 func TestApiHandler_UpdateDelete(t *testing.T) {
-	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	var ls Storage = NewLocalStorage("/tmp")
+	engine, err := CreateEngine(TEST_M, TEST_U, &ls, TEST_P)
 	require.NoError(t, err)
 
 	err = engine.StartAsync()
@@ -196,7 +198,8 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 }
 
 func TestApiHandler_FormUpload(t *testing.T) {
-	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	var ls Storage = NewLocalStorage("/tmp")
+	engine, err := CreateEngine(TEST_M, TEST_U, &ls, TEST_P)
 	require.NoError(t, err)
 
 	err = engine.StartAsync()
@@ -244,7 +247,8 @@ func TestApiHandler_FormUpload(t *testing.T) {
 func TestApiHandler_List(t *testing.T) {
 	randomBucket := uuid.New().String()
 
-	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	var ls Storage = NewLocalStorage("/tmp")
+	engine, err := CreateEngine(TEST_M, TEST_U, &ls, TEST_P)
 	require.NoError(t, err)
 
 	err = engine.StartAsync()
@@ -299,7 +303,8 @@ func TestApiHandler_List(t *testing.T) {
 func TestApiHandler_Meta(t *testing.T) {
 	randomBucket := uuid.New().String()
 
-	engine, err := CreateEngine(TEST_M, TEST_U, "/tmp", TEST_P)
+	var ls Storage = NewLocalStorage("/tmp")
+	engine, err := CreateEngine(TEST_M, TEST_U, &ls, TEST_P)
 	require.NoError(t, err)
 
 	err = engine.StartAsync()

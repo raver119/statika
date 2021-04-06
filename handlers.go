@@ -20,13 +20,13 @@ type ApiHandler struct {
 	userKey   string
 
 	pa      PersistenceAgent
-	storage Storage
+	storage *Storage
 }
 
-func NewApiHandler(masterKey string, userKey string, rootFolder string) (*ApiHandler, error) {
+func NewApiHandler(masterKey string, userKey string, storage *Storage) (*ApiHandler, error) {
 	mh := GetEnvOrDefault("MEMCACHED_HOST", "localhost")
 	pa, err := NewPersistenceAgent(mh, 11211)
-	return &ApiHandler{pa: pa, masterKey: masterKey, userKey: userKey, storage: NewLocalStorage(rootFolder)}, err
+	return &ApiHandler{pa: pa, masterKey: masterKey, userKey: userKey, storage: storage}, err
 }
 
 func (srv *ApiHandler) validateUploadToken(r *http.Request, bucket string) (ok bool) {
@@ -96,7 +96,7 @@ func (srv *ApiHandler) GetMeta(w http.ResponseWriter, r *http.Request) {
 	fileName := vars["fileName"]
 
 	// TODO: check meta file existence first, 404 would be more informative
-	meta, err := srv.storage.GetMeta(bucket, fileName)
+	meta, err := (*srv.storage).GetMeta(bucket, fileName)
 	if !OptionallyReport("failed to get meta", w, err) {
 		return
 	}
@@ -124,7 +124,7 @@ func (srv *ApiHandler) SetMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = srv.storage.PutMeta(bucket, fileName, meta)
+	err = (*srv.storage).PutMeta(bucket, fileName, meta)
 	if !OptionallyReport("failed to store meta", w, err) {
 		return
 	}
@@ -140,7 +140,7 @@ func (srv *ApiHandler) DeleteMeta(w http.ResponseWriter, r *http.Request) {
 	bucket := vars["bucket"]
 	fileName := vars["fileName"]
 
-	err := srv.storage.DeleteMeta(bucket, fileName)
+	err := (*srv.storage).DeleteMeta(bucket, fileName)
 	if !OptionallyReport("failed to delete meta", w, err) {
 		return
 	}
@@ -160,7 +160,7 @@ func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
 }
 
 func (srv *ApiHandler) processUpload(bucket string, fileName string, reader io.ReadSeeker, w http.ResponseWriter) (ur UploadResponse, err error) {
-	_, err = srv.storage.Put(bucket, fileName, reader)
+	_, err = (*srv.storage).Put(bucket, fileName, reader)
 	if !OptionallyReport("put failed", w, err) {
 		return
 	}
@@ -255,7 +255,7 @@ func (srv *ApiHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entries, err := srv.storage.List(bucket)
+	entries, err := (*srv.storage).List(bucket)
 	if !OptionallyReport("unable to list bucket", w, err) {
 		return
 	}

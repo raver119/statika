@@ -40,11 +40,13 @@ func main() {
 		panic(err)
 	}
 
+	var ls Storage = NewLocalStorage(rootFolder)
+
 	/*
 		Create server instance and start it
 	*/
 	fmt.Printf("Starting Statika server at port [%v], serving %v folder\n", port, rootFolder)
-	engine, err := CreateEngine(keyMaster, keyUpload, rootFolder, port)
+	engine, err := CreateEngine(keyMaster, keyUpload, &ls, port)
 	if err != nil {
 		fmt.Printf("CreateEngine failed: %v\n", err.Error())
 		panic(err)

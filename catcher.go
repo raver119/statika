@@ -7,13 +7,12 @@ import (
 )
 
 type Catcher struct {
-	storage Storage
+	storage *Storage
 	pa      PersistenceAgent
 }
 
-func NewCatcher(root string, pa PersistenceAgent) (c Catcher, err error) {
-	ls := NewLocalStorage(root)
-	return Catcher{storage: ls, pa: pa}, nil
+func NewCatcher(storage *Storage, pa PersistenceAgent) (c Catcher, err error) {
+	return Catcher{storage: storage, pa: pa}, nil
 }
 
 /*
@@ -48,7 +47,7 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		// read file from storage & validate it actually exists
-		reader, err := c.storage.Get(bucket, fileName)
+		reader, err := (*c.storage).Get(bucket, fileName)
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte(fmt.Sprintf("File not found: %v ", r.URL.Path)))
@@ -69,7 +68,7 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_ = c.storage.Delete(bucket, fileName)
+		_ = (*c.storage).Delete(bucket, fileName)
 		w.WriteHeader(http.StatusOK)
 		w.Write(responseOK())
 	}

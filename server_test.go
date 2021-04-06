@@ -11,7 +11,8 @@ const (
 )
 
 func TestServer_StartStop(t *testing.T) {
-	eng, err := CreateEngine(TEST_M, TEST_U, "/tmp", 80)
+	var ls Storage = NewLocalStorage("/tmp")
+	eng, err := CreateEngine(TEST_M, TEST_U, &ls, 80)
 	require.NoError(t, err)
 
 	err = eng.StartAsync()

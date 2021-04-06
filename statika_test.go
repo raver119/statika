@@ -14,7 +14,8 @@ const (
 )
 
 func TestGateKeeper_IssueUploadToken(t *testing.T) {
-	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	var ls Storage = NewLocalStorage("/tmp")
+	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
 	require.NoError(t, err)
 	require.NoError(t, e.StartAsync())
 	time.Sleep(1 * time.Second)
@@ -30,7 +31,8 @@ func TestGateKeeper_IssueUploadToken(t *testing.T) {
 }
 
 func TestGateKeeper_IssueUploadToken_2(t *testing.T) {
-	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	var ls Storage = NewLocalStorage("/tmp")
+	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
 	require.NoError(t, err)
 	require.NoError(t, e.StartAsync())
 	time.Sleep(1 * time.Second)

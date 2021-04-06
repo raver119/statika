@@ -13,7 +13,8 @@ import (
 )
 
 func TestClient_UploadFile(t *testing.T) {
-	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	var ls Storage = NewLocalStorage("/tmp")
+	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
 	require.NoError(t, err)
 	require.NoError(t, e.StartAsync())
 	time.Sleep(1 * time.Second)
@@ -53,7 +54,8 @@ func TestClient_UploadFile(t *testing.T) {
 }
 
 func TestClient_ListFiles(t *testing.T) {
-	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	var ls Storage = NewLocalStorage("/tmp")
+	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
 	require.NoError(t, err)
 	require.NoError(t, e.StartAsync())
 	time.Sleep(1 * time.Second)
@@ -86,7 +88,8 @@ func TestClient_ListFiles(t *testing.T) {
 }
 
 func TestClient_Meta(t *testing.T) {
-	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	var ls Storage = NewLocalStorage("/tmp")
+	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
 	require.NoError(t, err)
 	require.NoError(t, e.StartAsync())
 	time.Sleep(1 * time.Second)
