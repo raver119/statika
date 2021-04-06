@@ -48,8 +48,8 @@ jobs:
           UPLOAD_KEY: TEST_UPLOAD_KEY
           ROOT_DIR: /tmp
           STATIKA_PORT: 9191
-        run: ./service 1>/dev/null 2>/dev/null &
-        working-directory: 'service/'
+        run: ./statika 1>/dev/null 2>/dev/null &
+        working-directory: './'
 
       - name: Typescript API step
         run: |
