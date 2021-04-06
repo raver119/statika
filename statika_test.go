@@ -19,6 +19,7 @@ func TestGateKeeper_IssueUploadToken(t *testing.T) {
 	require.NoError(t, err)
 	require.NoError(t, e.StartAsync())
 	time.Sleep(1 * time.Second)
+
 	defer func() {
 		_ = e.Stop()
 	}()
