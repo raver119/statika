@@ -4,12 +4,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
+	"log"
 	"strings"
 	"testing"
 )
 
 func TestS3Storage_Get(t *testing.T) {
 	spacesBucket := GetEnvOrDefault("S3_BUCKET", "")
+	log.Printf("Bucket: %v", spacesBucket)
 	storage, err := NewSpacesStorage(spacesBucket, "https://nyc3.digitaloceanspaces.com")
 	require.NoError(t, err)
 
