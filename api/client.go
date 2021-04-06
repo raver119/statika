@@ -3,7 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"gopkg.in/resty.v1"
+	"github.com/go-resty/resty/v2"
 	"io"
 	"net/http"
 )
