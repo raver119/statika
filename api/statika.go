@@ -1,9 +1,9 @@
-package statika
+package api
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
+	"gopkg.in/resty.v1"
 	"net/http"
 )
 

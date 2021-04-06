@@ -17,10 +17,10 @@ jobs:
         run: |
           npm install
           npm run build
-        working-directory: 'api/typescript/'
+        working-directory: 'typescript/'
 
       - uses: JS-DevTools/npm-publish@v1
         with:
           token: ${{ secrets.NPM_TOKEN }}
-          package: ./api/typescript/package.json
+          package: ./typescript/package.json
           check-version: true

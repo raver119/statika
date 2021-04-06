@@ -18,7 +18,7 @@ import (
 )
 
 const TEST_B = "my_test_bucket"
-const TEST_P = 8080
+const TEST_P = 9191
 
 /*
 	This test validates login + file upload procedure
@@ -40,7 +40,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 	resp, err := client.R().
 		SetHeader("Accept", "application/json").
 		SetBody(negativeAuthReq).
-		Post("http://localhost:8080/rest/v1/auth/upload")
+		Post("http://localhost:9191/rest/v1/auth/upload")
 
 	require.NoError(t, err)
 
@@ -50,7 +50,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 	resp, err = client.R().
 		SetHeader("Accept", "application/json").
 		SetBody(positiveAuthReq).
-		Post("http://localhost:8080/rest/v1/auth/upload")
+		Post("http://localhost:9191/rest/v1/auth/upload")
 
 	require.NoError(t, err)
 
@@ -74,7 +74,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 	resp, err = client.R().
 		SetHeader("Accept", "application/json").
 		SetBody(positiveUploadReq).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode())
 
@@ -83,7 +83,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 		SetHeader("Accept", "application/json").
 		SetAuthToken(authResp.Token).
 		SetBody(positiveUploadReq).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode())
@@ -119,7 +119,7 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
-		Post("http://localhost:8080/rest/v1/auth/upload")
+		Post("http://localhost:9191/rest/v1/auth/upload")
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, ar.StatusCode())
@@ -140,7 +140,7 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 	ur, err := client.R().
 		SetAuthToken(authResp.Token).
 		SetBody(positiveUploadReq).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, ur.StatusCode())
@@ -158,7 +158,7 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 	ur, err = client.R().
 		SetAuthToken(authResp.Token).
 		SetBody(positiveUploadReq).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, ur.StatusCode())
@@ -173,14 +173,14 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	// test negative delete
 	dr, err := client.R().
-		Delete(fmt.Sprintf("http://localhost:8080%v", uploadResp.FileName))
+		Delete(fmt.Sprintf("http://localhost:9191%v", uploadResp.FileName))
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusUnauthorized, dr.StatusCode())
 
 	// test positive delete
 	dr, err = client.R().
 		SetAuthToken(authResp.Token).
-		Delete(fmt.Sprintf("http://localhost:8080%v", uploadResp.FileName))
+		Delete(fmt.Sprintf("http://localhost:9191%v", uploadResp.FileName))
 	require.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, dr.StatusCode())
@@ -209,7 +209,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
-		Post("http://localhost:8080/rest/v1/auth/upload")
+		Post("http://localhost:9191/rest/v1/auth/upload")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ar.StatusCode())
 
@@ -224,7 +224,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 			"token":  authResp.Token,
 			"bucket": TEST_B,
 		}).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
 
@@ -234,7 +234,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 	// test positive delete
 	dr, err := client.R().
 		SetAuthToken(authResp.Token).
-		Delete(fmt.Sprintf("http://localhost:8080%v", uploadResp.FileName))
+		Delete(fmt.Sprintf("http://localhost:9191%v", uploadResp.FileName))
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, dr.StatusCode())
 
@@ -257,7 +257,7 @@ func TestApiHandler_List(t *testing.T) {
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
-		Post("http://localhost:8080/rest/v1/auth/upload")
+		Post("http://localhost:9191/rest/v1/auth/upload")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ar.StatusCode())
 
@@ -270,7 +270,7 @@ func TestApiHandler_List(t *testing.T) {
 			"token":  authResp.Token,
 			"bucket": randomBucket,
 		}).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
 
@@ -280,13 +280,13 @@ func TestApiHandler_List(t *testing.T) {
 			"token":  authResp.Token,
 			"bucket": randomBucket,
 		}).
-		Post("http://localhost:8080/rest/v1/file")
+		Post("http://localhost:9191/rest/v1/file")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
 
 	lr, err := client.R().
 		SetAuthToken(authResp.Token).
-		Get(fmt.Sprintf("http://localhost:8080/rest/v1/files/%v", randomBucket))
+		Get(fmt.Sprintf("http://localhost:9191/rest/v1/files/%v", randomBucket))
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, lr.StatusCode(), string(lr.Body()))
 
@@ -312,7 +312,7 @@ func TestApiHandler_Meta(t *testing.T) {
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
-		Post("http://localhost:8080/rest/v1/auth/upload")
+		Post("http://localhost:9191/rest/v1/auth/upload")
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ar.StatusCode())
 
@@ -329,14 +329,14 @@ func TestApiHandler_Meta(t *testing.T) {
 	pm, err := client.R().
 		SetAuthToken(authResp.Token).
 		SetBody(meta).
-		Post(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
+		Post(fmt.Sprintf("http://localhost:9191/rest/v1/meta/%v/%v", randomBucket, fileName))
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, pm.StatusCode())
 
 	gm, err := client.R().
 		SetAuthToken(authResp.Token).
 		SetBody(meta).
-		Get(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
+		Get(fmt.Sprintf("http://localhost:9191/rest/v1/meta/%v/%v", randomBucket, fileName))
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, gm.StatusCode())
 
@@ -347,7 +347,7 @@ func TestApiHandler_Meta(t *testing.T) {
 	dm, err := client.R().
 		SetAuthToken(authResp.Token).
 		SetBody(meta).
-		Delete(fmt.Sprintf("http://localhost:8080/rest/v1/meta/%v/%v", randomBucket, fileName))
+		Delete(fmt.Sprintf("http://localhost:9191/rest/v1/meta/%v/%v", randomBucket, fileName))
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, dm.StatusCode())
 }

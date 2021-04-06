@@ -1,4 +1,4 @@
-package statika
+package api
 
 type MetaInfo map[string]string
 

@@ -1,18 +1,28 @@
-package statika
+package main
 
 import (
 	"github.com/google/uuid"
+	"github.com/raver119/statika/api"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestClient_UploadFile(t *testing.T) {
+	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	require.NoError(t, err)
+	require.NoError(t, e.StartAsync())
+	time.Sleep(1 * time.Second)
+	defer func() {
+		_ = e.Stop()
+	}()
+
 	testBucket := uuid.New().String()
-	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
+	gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
 	client, err := gk.IssueClient(testBucket)
@@ -43,8 +53,16 @@ func TestClient_UploadFile(t *testing.T) {
 }
 
 func TestClient_ListFiles(t *testing.T) {
+	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	require.NoError(t, err)
+	require.NoError(t, e.StartAsync())
+	time.Sleep(1 * time.Second)
+	defer func() {
+		_ = e.Stop()
+	}()
+
 	testBucket := uuid.New().String()
-	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
+	gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
 	token, err := gk.IssueUploadToken(testBucket)
@@ -64,18 +82,26 @@ func TestClient_ListFiles(t *testing.T) {
 	files, err := client.ListFiles()
 	require.NoError(t, err)
 
-	require.Equal(t, []FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
+	require.Equal(t, []api.FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
 }
 
 func TestClient_Meta(t *testing.T) {
+	e, err := CreateEngine(masterKey, uploadKey, "/tmp", 9191)
+	require.NoError(t, err)
+	require.NoError(t, e.StartAsync())
+	time.Sleep(1 * time.Second)
+	defer func() {
+		_ = e.Stop()
+	}()
+
 	testBucket := uuid.New().String()
-	gk, err := NewGateKeeper(endpoint, masterKey, uploadKey)
+	gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
 	client, err := gk.IssueClient(testBucket)
 	require.NoError(t, err)
 
-	meta := MetaInfo{
+	meta := api.MetaInfo{
 		"alpha": "1",
 		"beta":  "2",
 	}
@@ -91,5 +117,5 @@ func TestClient_Meta(t *testing.T) {
 	// must be empty map
 	restored, err = client.GetMeta("file5.txt")
 	require.NoError(t, err)
-	assert.Equal(t, MetaInfo{}, restored)
+	assert.Equal(t, api.MetaInfo{}, restored)
 }

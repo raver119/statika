@@ -1,4 +1,4 @@
-module github.com/raver119/statika/service
+module github.com/raver119/statika
 
 go 1.15
 
