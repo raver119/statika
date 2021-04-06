@@ -9,8 +9,7 @@ import (
 )
 
 type Engine struct {
-	// root folder
-	root string
+	storage *Storage
 
 	// auth keys
 	keyMaster string
@@ -28,25 +27,25 @@ type Engine struct {
 	startedAsync bool
 }
 
-func CreateEngine(keyMaster string, keyUpload string, rootFolder string, port int) (e Engine, err error) {
+func CreateEngine(keyMaster string, keyUpload string, storage *Storage, port int) (e Engine, err error) {
 	mh := GetEnvOrDefault("MEMCACHED_HOST", "localhost")
 	pa, err := NewPersistenceAgent(mh, 11211)
 	if err != nil {
 		return
 	}
 
-	handlers, err := NewApiHandler(keyMaster, keyUpload, rootFolder)
+	handlers, err := NewApiHandler(keyMaster, keyUpload, storage)
 	if err != nil {
 		return
 	}
 
-	router, err := buildRouter(handlers, rootFolder, pa)
+	router, err := buildRouter(handlers, storage, pa)
 	if err != nil {
 		return
 	}
 
 	e = Engine{
-		root:      rootFolder,
+		storage:   storage,
 		keyMaster: keyMaster,
 		keyUpload: keyUpload,
 		port:      port,
@@ -57,7 +56,7 @@ func CreateEngine(keyMaster string, keyUpload string, rootFolder string, port in
 	return
 }
 
-func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) (router *mux.Router, err error) {
+func buildRouter(handlers *ApiHandler, storage *Storage, pa PersistenceAgent) (router *mux.Router, err error) {
 	router = mux.NewRouter()
 
 	api := router.PathPrefix("/rest/v1").Subrouter()
@@ -73,7 +72,7 @@ func buildRouter(handlers *ApiHandler, rootFolder string, pa PersistenceAgent) (
 	api.HandleFunc("/meta/{bucket}/{fileName}", CorsHandler(handlers.DeleteMeta)).Methods(http.MethodDelete, http.MethodOptions)
 
 	// catch-all handler for static files serving
-	catcher, err := NewCatcher(rootFolder, pa)
+	catcher, err := NewCatcher(storage, pa)
 	if err != nil {
 		return
 	}
@@ -90,7 +89,7 @@ func (e Engine) StartAsync() (err error) {
 	go func() {
 		defer e.wg.Done()
 
-		e.srv.ListenAndServe()
+		err = e.srv.ListenAndServe()
 	}()
 	return
 }
@@ -102,7 +101,7 @@ func (e Engine) Start() error {
 
 func (e Engine) Stop() (err error) {
 	if e.startedAsync {
-		e.srv.Shutdown(context.TODO())
+		err = e.srv.Shutdown(context.TODO())
 		// do it
 		e.wg.Wait()
 	}

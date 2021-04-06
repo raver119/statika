@@ -9,6 +9,7 @@ jobs:
   build:
     name: All tests
     runs-on: ubuntu-latest
+    environment: Default
     steps:
 
       #
@@ -35,11 +36,15 @@ jobs:
       #
 
       - name: Build & Test Backend
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_KEY: ${{ secrets.S3_KEY }}
+          S3_SECRET: ${{ secrets.S3_SECRET }}
         run: |
           go get -v -t -d ./...
           go test -v  ./...
           go build -v .
-        working-directory: 'service/'
+        working-directory: './'
 
       - name: Run Backend service
         env:
@@ -48,20 +53,12 @@ jobs:
           UPLOAD_KEY: TEST_UPLOAD_KEY
           ROOT_DIR: /tmp
           STATIKA_PORT: 9191
-        run: ./service 1>/dev/null 2>/dev/null &
-        working-directory: 'service/'
+        run: ./statika 1>/dev/null 2>/dev/null &
+        working-directory: './'
 
       - name: Typescript API step
         run: |
           yarn install --frozen-lockfile
           yarn build
           yarn test:ci
-        working-directory: 'api/typescript/'
-
-      - name: Golang API step
-        run: |
-          go get -v -t -d ./...
-          go test -v  ./...
-          go build -v .
-        working-directory: 'api/go-statika/'
-
+        working-directory: 'typescript/'

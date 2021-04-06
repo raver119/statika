@@ -1,8 +1,7 @@
 FROM golang:1.16-buster as builder
 
 # copy source files
-COPY ./service /service
-
+COPY ./ /service
 
 WORKDIR /service
 
@@ -14,7 +13,7 @@ RUN go build -v .
 
 FROM ubuntu:20.04
 
-COPY --from=builder /service/service /application/statika
+COPY --from=builder /service/statika /application/statika
 
 RUN groupadd -r user && useradd -r -g user user
 RUN chown -R user.user /application

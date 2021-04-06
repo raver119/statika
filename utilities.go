@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -17,6 +18,14 @@ func GetEnvOrDefault(variable string, defaultValue string) string {
 		return val
 	} else {
 		return defaultValue
+	}
+}
+
+func GetEnvOrPanic(variable string) string {
+	if val, ok := os.LookupEnv(variable); ok {
+		return val
+	} else {
+		panic(fmt.Errorf("Environment variable wasn't found: [%v]", variable))
 	}
 }
 
@@ -115,4 +124,15 @@ func CorsHandler(hf http.HandlerFunc) http.HandlerFunc {
 			hf.ServeHTTP(w, r)
 		}
 	}
+}
+
+func MasterFileName(bucket string, fileName string) string {
+	b, f := EncodePath(bucket, fileName)
+	return fmt.Sprintf("%v/%v", b, f)
+}
+
+func MasterMetaName(bucket string, fileName string) string {
+	b := base64.StdEncoding.EncodeToString([]byte(bucket))
+	f := base64.StdEncoding.EncodeToString([]byte(fileName)) + META_EXTENSION
+	return fmt.Sprintf("%v/%v", b, f)
 }
