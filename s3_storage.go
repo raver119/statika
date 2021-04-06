@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"io"
+	"io/ioutil"
 )
 
 type S3Storage struct {
@@ -121,13 +124,23 @@ func (s S3Storage) Delete(bucket string, name string) (err error) {
 }
 
 func (s S3Storage) PutMeta(bucket string, filename string, meta MetaInfo) (err error) {
+	b, _ := json.Marshal(meta)
+	_, err = s.Put(bucket, filename+META_EXTENSION, bytes.NewReader(b))
 	return
 }
 
 func (s S3Storage) GetMeta(bucket string, filename string) (meta MetaInfo, err error) {
+	b, err := s.Get(bucket, filename+META_EXTENSION)
+	if err != nil {
+		return nil, err
+	}
+
+	body, _ := ioutil.ReadAll(b)
+	err = json.Unmarshal(body, &meta)
 	return
 }
 
 func (s S3Storage) DeleteMeta(bucket string, filename string) (err error) {
+	err = s.Delete(bucket, filename+META_EXTENSION)
 	return
 }

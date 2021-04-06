@@ -21,6 +21,14 @@ func GetEnvOrDefault(variable string, defaultValue string) string {
 	}
 }
 
+func GetEnvOrPanic(variable string) string {
+	if val, ok := os.LookupEnv(variable); ok {
+		return val
+	} else {
+		panic(fmt.Errorf("Environment variable wasn't found: [%v]", variable))
+	}
+}
+
 func FileExists(fileName string, fileOnly bool) bool {
 	fi, err := os.Stat(fileName)
 	if err != nil {
