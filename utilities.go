@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -115,4 +116,15 @@ func CorsHandler(hf http.HandlerFunc) http.HandlerFunc {
 			hf.ServeHTTP(w, r)
 		}
 	}
+}
+
+func MasterFileName(bucket string, fileName string) string {
+	b, f := EncodePath(bucket, fileName)
+	return fmt.Sprintf("%v/%v", b, f)
+}
+
+func MasterMetaName(bucket string, fileName string) string {
+	b := base64.StdEncoding.EncodeToString([]byte(bucket))
+	f := base64.StdEncoding.EncodeToString([]byte(fileName)) + META_EXTENSION
+	return fmt.Sprintf("%v/%v", b, f)
 }

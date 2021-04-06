@@ -38,19 +38,8 @@ func (s LocalStorage) prepareFolder(bucket string) (err error) {
 	return
 }
 
-func (s LocalStorage) masterFileName(bucket string, fileName string) string {
-	b, f := EncodePath(bucket, fileName)
-	return fmt.Sprintf("%v/%v", b, f)
-}
-
-func (s LocalStorage) masterMetaName(bucket string, fileName string) string {
-	b := base64.StdEncoding.EncodeToString([]byte(bucket))
-	f := base64.StdEncoding.EncodeToString([]byte(fileName)) + META_EXTENSION
-	return fmt.Sprintf("%v/%v", b, f)
-}
-
 func (s LocalStorage) Get(bucket string, name string) (r CloseableReader, err error) {
-	path := s.rootFolder + "/" + s.masterFileName(bucket, name)
+	path := s.rootFolder + "/" + MasterFileName(bucket, name)
 	if !FileExists(path, true) {
 		err = fmt.Errorf("requested file doesn't exist: [%v/%v]", bucket, name)
 		return
@@ -60,8 +49,8 @@ func (s LocalStorage) Get(bucket string, name string) (r CloseableReader, err er
 	return
 }
 
-func (s LocalStorage) Put(bucket string, name string, r io.Reader) (fileName string, err error) {
-	fileName = s.masterFileName(bucket, name)
+func (s LocalStorage) Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error) {
+	fileName = MasterFileName(bucket, name)
 
 	err = s.prepareFolder(bucket)
 	if err != nil {
@@ -83,10 +72,10 @@ func (s LocalStorage) Put(bucket string, name string, r io.Reader) (fileName str
 }
 
 func (s LocalStorage) Delete(bucket string, name string) (err error) {
-	err = os.Remove(s.rootFolder + "/" + s.masterFileName(bucket, name))
+	err = os.Remove(s.rootFolder + "/" + MasterFileName(bucket, name))
 
 	// meta should be deleted regardless of result
-	_ = os.Remove(s.rootFolder + "/" + s.masterMetaName(bucket, name))
+	_ = os.Remove(s.rootFolder + "/" + MasterMetaName(bucket, name))
 	return
 }
 
@@ -96,7 +85,8 @@ func (s LocalStorage) List(bucket string) (f []FileEntry, err error) {
 
 	files, err := ioutil.ReadDir(s.rootFolder + "/" + b)
 	if err != nil {
-		return nil, err
+		// just return empty array, as if there's no files
+		return f, nil
 	}
 
 	for _, v := range files {
@@ -127,7 +117,7 @@ func (s LocalStorage) List(bucket string) (f []FileEntry, err error) {
 }
 
 func (s LocalStorage) PutMeta(bucket string, filename string, meta MetaInfo) (err error) {
-	bf := s.masterMetaName(bucket, filename)
+	bf := MasterMetaName(bucket, filename)
 
 	err = s.prepareFolder(bucket)
 	if err != nil {
@@ -156,7 +146,7 @@ func (s LocalStorage) PutMeta(bucket string, filename string, meta MetaInfo) (er
 }
 
 func (s LocalStorage) GetMeta(bucket string, filename string) (meta MetaInfo, err error) {
-	bf := s.masterMetaName(bucket, filename)
+	bf := MasterMetaName(bucket, filename)
 
 	path := fmt.Sprintf("%v/%v", s.rootFolder, bf)
 	if !FileExists(path, true) {
@@ -179,7 +169,7 @@ func (s LocalStorage) GetMeta(bucket string, filename string) (meta MetaInfo, er
 }
 
 func (s LocalStorage) DeleteMeta(bucket string, filename string) (err error) {
-	bf := s.masterMetaName(bucket, filename)
+	bf := MasterMetaName(bucket, filename)
 
 	path := fmt.Sprintf("%v/%v", s.rootFolder, bf)
 	err = os.Remove(path)

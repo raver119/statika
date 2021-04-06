@@ -159,7 +159,7 @@ func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(responseOK())
 }
 
-func (srv *ApiHandler) processUpload(bucket string, fileName string, reader io.Reader, w http.ResponseWriter) (ur UploadResponse, err error) {
+func (srv *ApiHandler) processUpload(bucket string, fileName string, reader io.ReadSeeker, w http.ResponseWriter) (ur UploadResponse, err error) {
 	_, err = srv.storage.Put(bucket, fileName, reader)
 	if !OptionallyReport("put failed", w, err) {
 		return
