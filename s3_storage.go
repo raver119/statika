@@ -1,8 +1,8 @@
 package main
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -10,10 +10,11 @@ import (
 )
 
 type S3Storage struct {
+	bucket    string
 	awsConfig *aws.Config
 }
 
-func NewS3Storage(endpoint string, region string) (s S3Storage, err error) {
+func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, err error) {
 	spacesKey := GetEnvOrDefault("S3_KEY", "")
 	spacesSecret := GetEnvOrDefault("S3_SECRET", "")
 
@@ -23,12 +24,12 @@ func NewS3Storage(endpoint string, region string) (s S3Storage, err error) {
 		Region:      aws.String(region),
 	}
 
-	return S3Storage{awsConfig: s3Config}, nil
+	return S3Storage{bucket: bucket, awsConfig: s3Config}, nil
 }
 
 // endpoint looks like "https://nyc3.digitaloceanspaces.com", region is hardcoded
-func NewSpacesStorage(endpoint string) (s S3Storage, err error) {
-	return NewS3Storage(endpoint, "us-east-1")
+func NewSpacesStorage(bucket string, endpoint string) (s S3Storage, err error) {
+	return NewS3Storage(bucket, endpoint, "us-east-1")
 }
 
 func (s S3Storage) client() (c *s3.S3, err error) {
@@ -48,8 +49,8 @@ func (s S3Storage) Get(bucket string, name string) (r CloseableReader, err error
 	}
 
 	input := &s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(name),
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(bucket + "/" + name),
 	}
 
 	result, err := c.GetObject(input)
@@ -66,30 +67,10 @@ func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName st
 		return fileName, err
 	}
 
-	// try to create bucket first
-	params := &s3.CreateBucketInput{
-		Bucket: aws.String(bucket),
-	}
-
-	_, err = c.CreateBucket(params)
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case s3.ErrCodeBucketAlreadyExists:
-				// do nothing, it already exists
-			case s3.ErrCodeBucketAlreadyOwnedByYou:
-				// same, do nothing
-			default:
-				// all other errors indicate real error
-				return fileName, err
-			}
-		}
-	}
-
 	// use this bucket to upload file
 	object := s3.PutObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(name),
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(bucket + "/" + name),
 		Body:   r,
 		ACL:    aws.String("private"), // all files will be accessed through proxy anyway
 		Metadata: map[string]*string{
@@ -98,7 +79,7 @@ func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName st
 	}
 
 	_, err = c.PutObject(&object)
-	return
+	return fmt.Sprintf("%v/%v", bucket, name), err
 }
 
 func (s S3Storage) List(bucket string) (f []FileEntry, err error) {
@@ -108,7 +89,8 @@ func (s S3Storage) List(bucket string) (f []FileEntry, err error) {
 	}
 
 	input := &s3.ListObjectsInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(s.bucket),
+		Prefix: aws.String(bucket + "/"),
 	}
 
 	objects, err := c.ListObjects(input)
@@ -130,8 +112,8 @@ func (s S3Storage) Delete(bucket string, name string) (err error) {
 	}
 
 	input := &s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(name),
+		Bucket: aws.String(s.bucket),
+		Key:    aws.String(bucket + "/" + name),
 	}
 
 	_, err = c.DeleteObject(input)
