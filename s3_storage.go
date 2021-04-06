@@ -14,8 +14,8 @@ type S3Storage struct {
 }
 
 func NewS3Storage(endpoint string, region string) (s S3Storage, err error) {
-	spacesKey := GetEnvOrDefault("SPACES_KEY", "")
-	spacesSecret := GetEnvOrDefault("SPACES_SECRET", "")
+	spacesKey := GetEnvOrDefault("S3_KEY", "")
+	spacesSecret := GetEnvOrDefault("S3_SECRET", "")
 
 	s3Config := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(spacesKey, spacesSecret, ""),
@@ -41,9 +41,23 @@ func (s S3Storage) client() (c *s3.S3, err error) {
 	return
 }
 
-func (s S3Storage) Get(name string) (r CloseableReader, err error) {
+func (s S3Storage) Get(bucket string, name string) (r CloseableReader, err error) {
+	c, err := s.client()
+	if err != nil {
+		return nil, err
+	}
 
-	return
+	input := &s3.GetObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(name),
+	}
+
+	result, err := c.GetObject(input)
+	if err != nil {
+		return nil, err
+	}
+
+	return result.Body, err
 }
 
 func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error) {
@@ -88,11 +102,40 @@ func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName st
 }
 
 func (s S3Storage) List(bucket string) (f []FileEntry, err error) {
+	c, err := s.client()
+	if err != nil {
+		return nil, err
+	}
+
+	input := &s3.ListObjectsInput{
+		Bucket: aws.String(bucket),
+	}
+
+	objects, err := c.ListObjects(input)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, obj := range objects.Contents {
+		f = append(f, FileEntry{FileName: aws.StringValue(obj.Key)})
+	}
+
 	return
 }
 
 func (s S3Storage) Delete(bucket string, name string) (err error) {
-	return
+	c, err := s.client()
+	if err != nil {
+		return err
+	}
+
+	input := &s3.DeleteObjectInput{
+		Bucket: aws.String(bucket),
+		Key:    aws.String(name),
+	}
+
+	_, err = c.DeleteObject(input)
+	return err
 }
 
 func (s S3Storage) PutMeta(bucket string, filename string, meta MetaInfo) (err error) {
