@@ -66,6 +66,7 @@ func TestS3Storage_GetMeta(t *testing.T) {
 
 	restored, err := storage.GetMeta("test", "filename.txt")
 	assert.Equal(t, meta, restored)
+	assert.Equal(t, "2", meta["beta"])
 
 	require.NoError(t, storage.DeleteMeta("test", "filename.txt"))
 }

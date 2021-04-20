@@ -27,6 +27,10 @@ func NewLocalStorage(root string) LocalStorage {
 	return LocalStorage{rootFolder: root}
 }
 
+func (s LocalStorage) Name() string {
+	return "Local storage"
+}
+
 func (s LocalStorage) prepareFolder(bucket string) (err error) {
 	b := base64.StdEncoding.EncodeToString([]byte(bucket))
 

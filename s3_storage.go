@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -33,6 +34,10 @@ func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, e
 // endpoint looks like "https://nyc3.digitaloceanspaces.com", region is hardcoded
 func NewSpacesStorage(bucket string, endpoint string) (s S3Storage, err error) {
 	return NewS3Storage(bucket, endpoint, "us-east-1")
+}
+
+func (s S3Storage) Name() string {
+	return "S3 storage"
 }
 
 func (s S3Storage) client() (c *s3.S3, err error) {
@@ -132,6 +137,11 @@ func (s S3Storage) PutMeta(bucket string, filename string, meta MetaInfo) (err e
 func (s S3Storage) GetMeta(bucket string, filename string) (meta MetaInfo, err error) {
 	b, err := s.Get(bucket, filename+META_EXTENSION)
 	if err != nil {
+		aerr, ok := err.(awserr.Error)
+		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
+			// just a 404, return empty MetaInfo
+			return MetaInfo{}, nil
+		}
 		return nil, err
 	}
 

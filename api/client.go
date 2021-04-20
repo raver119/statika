@@ -110,7 +110,7 @@ func (c Client) GetMeta(fileName string) (meta MetaInfo, err error) {
 	}
 
 	if response.StatusCode() != http.StatusOK {
-		err = fmt.Errorf("http request returned unexpected error code: %v", response.StatusCode())
+		err = fmt.Errorf("http request returned unexpected error code: %v; %v", response.StatusCode(), response.String())
 		return nil, err
 	}
 
