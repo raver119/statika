@@ -13,6 +13,9 @@ RUN go build -v .
 
 FROM ubuntu:20.04
 
+# some certificates to be present
+RUN apt update && apt install -y ca-certificates
+
 COPY --from=builder /service/statika /application/statika
 
 RUN groupadd -r user && useradd -r -g user user
