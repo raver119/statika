@@ -3,6 +3,8 @@ package main
 import "io"
 
 type Storage interface {
+	Name() string
+
 	Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error)
 	Get(bucket string, name string) (r CloseableReader, err error)
 	List(bucket string) (f []FileEntry, err error)

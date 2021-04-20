@@ -99,7 +99,7 @@ func (c Client) SetMeta(fileName string, meta MetaInfo) (err error) {
 func (c Client) GetMeta(fileName string) (meta MetaInfo, err error) {
 	response, err := c.resty.R().
 		SetAuthToken(string(c.uploadToken)).
-		Get(fmt.Sprintf(fmt.Sprintf("%v/rest/v1/meta/%v/%v", c.endpoint, c.bucket, fileName)))
+		Get(fmt.Sprintf("%v/rest/v1/meta/%v/%v", c.endpoint, c.bucket, fileName))
 
 	if err != nil {
 		return nil, err
@@ -110,7 +110,7 @@ func (c Client) GetMeta(fileName string) (meta MetaInfo, err error) {
 	}
 
 	if response.StatusCode() != http.StatusOK {
-		err = fmt.Errorf("http request returned unexpected error code: %v", response.StatusCode())
+		err = fmt.Errorf("http request returned unexpected error code: %v; %v", response.StatusCode(), response.String())
 		return nil, err
 	}
 
@@ -121,7 +121,7 @@ func (c Client) GetMeta(fileName string) (meta MetaInfo, err error) {
 func (c Client) DeleteMeta(fileName string) (err error) {
 	response, err := c.resty.R().
 		SetAuthToken(string(c.uploadToken)).
-		Delete(fmt.Sprintf(fmt.Sprintf("%v/rest/v1/meta/%v/%v", c.endpoint, c.bucket, fileName)))
+		Delete(fmt.Sprintf("%v/rest/v1/meta/%v/%v", c.endpoint, c.bucket, fileName))
 	if err != nil {
 		return err
 	}

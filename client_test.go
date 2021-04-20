@@ -54,71 +54,97 @@ func TestClient_UploadFile(t *testing.T) {
 }
 
 func TestClient_ListFiles(t *testing.T) {
-	var ls Storage = NewLocalStorage("/tmp")
-	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
-	require.NoError(t, err)
-	require.NoError(t, e.StartAsync())
-	time.Sleep(1 * time.Second)
-	defer func() {
-		_ = e.Stop()
-	}()
-
-	testBucket := uuid.New().String()
-	gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
+	bucket := GetEnvOrPanic("S3_BUCKET")
+	ep := GetEnvOrDefault("S3_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
+	_ = GetEnvOrPanic("S3_KEY")
+	_ = GetEnvOrPanic("S3_SECRET")
+	s3storage, err := NewSpacesStorage(bucket, ep)
 	require.NoError(t, err)
 
-	token, err := gk.IssueUploadToken(testBucket)
-	require.NoError(t, err)
+	var storages = []Storage{NewLocalStorage("/tmp"), s3storage}
 
-	client, err := gk.NewClient(testBucket, token)
-	require.NoError(t, err)
+	for _, ls := range storages {
+		t.Run(ls.Name(), func(t *testing.T) {
+			e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
+			require.NoError(t, err)
+			require.NoError(t, e.StartAsync())
+			time.Sleep(1 * time.Second)
+			defer func() {
+				_ = e.Stop()
+			}()
 
-	content := "random text content"
+			testBucket := uuid.New().String()
+			gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
+			require.NoError(t, err)
 
-	_, err = client.UploadFile("file5.txt", strings.NewReader(content))
-	require.NoError(t, err)
+			token, err := gk.IssueUploadToken(testBucket)
+			require.NoError(t, err)
 
-	_, err = client.UploadFile("file6.txt", strings.NewReader(content))
-	require.NoError(t, err)
+			client, err := gk.NewClient(testBucket, token)
+			require.NoError(t, err)
 
-	files, err := client.ListFiles()
-	require.NoError(t, err)
+			content := "random text content"
 
-	require.Equal(t, []api.FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
+			_, err = client.UploadFile("file5.txt", strings.NewReader(content))
+			require.NoError(t, err)
+
+			_, err = client.UploadFile("file6.txt", strings.NewReader(content))
+			require.NoError(t, err)
+
+			files, err := client.ListFiles()
+			require.NoError(t, err)
+
+			require.Equal(t, []api.FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
+		})
+	}
 }
 
 func TestClient_Meta(t *testing.T) {
-	var ls Storage = NewLocalStorage("/tmp")
-	e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
-	require.NoError(t, err)
-	require.NoError(t, e.StartAsync())
-	time.Sleep(1 * time.Second)
-	defer func() {
-		_ = e.Stop()
-	}()
-
-	testBucket := uuid.New().String()
-	gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
+	bucket := GetEnvOrPanic("S3_BUCKET")
+	ep := GetEnvOrDefault("S3_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
+	_ = GetEnvOrPanic("S3_KEY")
+	_ = GetEnvOrPanic("S3_SECRET")
+	s3storage, err := NewSpacesStorage(bucket, ep)
 	require.NoError(t, err)
 
-	client, err := gk.IssueClient(testBucket)
-	require.NoError(t, err)
+	var storages = []Storage{NewLocalStorage("/tmp"), s3storage}
 
-	meta := api.MetaInfo{
-		"alpha": "1",
-		"beta":  "2",
+	for _, ls := range storages {
+		t.Run(ls.Name(), func(t *testing.T) {
+			e, err := CreateEngine(masterKey, uploadKey, &ls, 9191)
+			require.NoError(t, err)
+			require.NoError(t, e.StartAsync())
+			time.Sleep(1 * time.Second)
+			defer func() {
+				_ = e.Stop()
+			}()
+
+			testBucket := uuid.New().String()
+			gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
+			require.NoError(t, err)
+
+			client, err := gk.IssueClient(testBucket)
+			require.NoError(t, err)
+
+			meta := api.MetaInfo{
+				"alpha": "1",
+				"beta":  "2",
+			}
+
+			require.NoError(t, client.SetMeta("file5.txt", meta))
+
+			restored, err := client.GetMeta("file5.txt")
+			require.NoError(t, err)
+			assert.Equal(t, meta, restored)
+			assert.Equal(t, "2", restored["beta"])
+			assert.Equal(t, 2, len(restored))
+
+			require.NoError(t, client.DeleteMeta("file5.txt"))
+
+			// must be empty map
+			restored, err = client.GetMeta("file5.txt")
+			require.NoError(t, err)
+			assert.Equal(t, api.MetaInfo{}, restored)
+		})
 	}
-
-	require.NoError(t, client.SetMeta("file5.txt", meta))
-
-	restored, err := client.GetMeta("file5.txt")
-	require.NoError(t, err)
-	assert.Equal(t, meta, restored)
-
-	require.NoError(t, client.DeleteMeta("file5.txt"))
-
-	// must be empty map
-	restored, err = client.GetMeta("file5.txt")
-	require.NoError(t, err)
-	assert.Equal(t, api.MetaInfo{}, restored)
 }
