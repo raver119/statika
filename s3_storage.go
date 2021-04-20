@@ -11,6 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"io"
 	"io/ioutil"
+	"strings"
 )
 
 type S3Storage struct {
@@ -107,7 +108,8 @@ func (s S3Storage) List(bucket string) (f []FileEntry, err error) {
 	}
 
 	for _, obj := range objects.Contents {
-		f = append(f, FileEntry{FileName: aws.StringValue(obj.Key)})
+		// strip bucket name from the file name
+		f = append(f, FileEntry{FileName: strings.Replace(aws.StringValue(obj.Key), bucket+"/", "", 1)})
 	}
 
 	return
