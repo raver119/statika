@@ -63,6 +63,9 @@ func (a PersistenceAgent) CheckUploadToken(authToken string, bucket string) bool
 		return false
 	}
 
+	// extend token life span
+	a.TouchUploadToken(authToken)
+
 	return true
 }
 
@@ -82,7 +85,7 @@ func (a PersistenceAgent) TouchUploadToken(authToken string) bool {
 
 func (a PersistenceAgent) TouchMasterToken(authToken string) (err error) {
 	encAuthToken := base64.StdEncoding.EncodeToString([]byte(a.normalizeToken(authToken)))
-	err = a.memCached.Touch(PrefixMaster+encAuthToken, 3600)
+	err = a.memCached.Touch(PrefixMaster+encAuthToken, a.Expiration())
 	return
 }
 
