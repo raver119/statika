@@ -51,6 +51,9 @@ func TestClient_UploadFile(t *testing.T) {
 	response, err = http.Get(endpoint + ur.FileName)
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusNotFound, response.StatusCode)
+
+	// let's ping the server, to make sure our key is still ok
+	require.NoError(t, client.Ping())
 }
 
 func TestClient_ListFiles(t *testing.T) {
@@ -95,6 +98,9 @@ func TestClient_ListFiles(t *testing.T) {
 			require.NoError(t, err)
 
 			require.Equal(t, []api.FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
+
+			// ping must succeed
+			require.NoError(t, client.Ping())
 		})
 	}
 }
@@ -145,6 +151,13 @@ func TestClient_Meta(t *testing.T) {
 			restored, err = client.GetMeta("file5.txt")
 			require.NoError(t, err)
 			assert.Equal(t, api.MetaInfo{}, restored)
+
+			// ping must succeed
+			require.NoError(t, client.Ping())
+
+			// now master a fake client, so it fails on ping
+			fake, _ := gk.NewClient("bad bucket", "bad token")
+			require.Error(t, fake.Ping())
 		})
 	}
 }
