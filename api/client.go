@@ -131,3 +131,25 @@ func (c Client) DeleteMeta(fileName string) (err error) {
 	}
 	return
 }
+
+func (c Client) Ping() (err error) {
+	response, err := c.resty.R().
+		SetAuthToken(string(c.uploadToken)).
+		Get(fmt.Sprintf("%v/rest/v1/ping", c.endpoint))
+
+	if err != nil {
+		return err
+	}
+
+	if response.StatusCode() == http.StatusUnauthorized {
+		err = fmt.Errorf("unauthorized. probably expired token: %v", response.String())
+		return
+	}
+
+	if response.StatusCode() != http.StatusOK {
+		err = fmt.Errorf("http request returned unexpected error code: %v", response.StatusCode())
+		return
+	}
+
+	return
+}
