@@ -68,7 +68,7 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			})
 
 			// report timing
-			w.Header().Add("Server-Timing", fmt.Sprintf(`get;desc="Storage GET";dur=%v, read;desc="Storage READ;dur=%v"`, init, read))
+			w.Header().Add("Server-Timing", fmt.Sprintf(`get;desc="Storage GET";dur=%v, read;desc="Storage READ";dur=%v`, init, read))
 			w.WriteHeader(http.StatusOK)
 
 			// and now transfer fetched data to the client
