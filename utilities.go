@@ -148,5 +148,5 @@ func MasterMetaName(bucket string, fileName string) string {
 func TimeIt(f func()) int64 {
 	start := time.Now().UnixNano() / 1000000
 	f()
-	return (time.Now().Unix() / 1000000) - start
+	return (time.Now().UnixNano() / 1000000) - start
 }
