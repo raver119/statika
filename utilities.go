@@ -29,6 +29,14 @@ func GetEnvOrPanic(variable string) string {
 	}
 }
 
+func IsTimingEnabled() bool {
+	if _, ok := os.LookupEnv("TIMING"); ok {
+		return true
+	} else {
+		return false
+	}
+}
+
 func FileExists(fileName string, fileOnly bool) bool {
 	fi, err := os.Stat(fileName)
 	if err != nil {
@@ -135,4 +143,10 @@ func MasterMetaName(bucket string, fileName string) string {
 	b := base64.StdEncoding.EncodeToString([]byte(bucket))
 	f := base64.StdEncoding.EncodeToString([]byte(fileName)) + META_EXTENSION
 	return fmt.Sprintf("%v/%v", b, f)
+}
+
+func TimeIt(f func()) int64 {
+	start := time.Now().Unix()
+	f()
+	return time.Now().Unix() - start
 }

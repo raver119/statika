@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"net/http"
 	"strings"
@@ -47,16 +48,36 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodGet {
 		// read file from storage & validate it actually exists
-		reader, err := (*c.storage).Get(bucket, fileName)
+		var reader CloseableReader
+		var err error
+		init := TimeIt(func() {
+			reader, err = (*c.storage).Get(bucket, fileName)
+		})
+
 		if err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			_, _ = w.Write([]byte(fmt.Sprintf("File not found: %v ", r.URL.Path)))
 			return
 		}
 
-		// return it to the end user
-		w.WriteHeader(http.StatusOK)
-		_ = TransferBytes(reader, w)
+		if IsTimingEnabled() {
+			//to get storage read time I'll fetch data into this temporary buffer
+			b := bytes.NewBuffer([]byte{})
+			read := TimeIt(func() {
+				_ = TransferBytes(reader, b)
+			})
+
+			// report timing
+			w.Header().Add("Server-Timing", fmt.Sprintf(`get;desc="Storage GET";dur=%v, read;desc="Storage READ;dur=%v"`, init, read))
+			w.WriteHeader(http.StatusOK)
+
+			// and now transfer fetched data to the client
+			_ = TransferBytes(b, w)
+		} else {
+			// return it to the end user
+			w.WriteHeader(http.StatusOK)
+			_ = TransferBytes(reader, w)
+		}
 		_ = reader.Close()
 	} else {
 		// delete method
