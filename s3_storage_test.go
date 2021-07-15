@@ -70,3 +70,22 @@ func TestS3Storage_GetMeta(t *testing.T) {
 
 	require.NoError(t, storage.DeleteMeta("test", "filename.txt"))
 }
+
+func Test_validMode(t *testing.T) {
+	tests := []struct {
+		name string
+		mode string
+		want bool
+	}{
+		{"test_0", "private", true},
+		{"test_1", "public-read", true},
+		{"test_2", "random-access-mode", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := validMode(tt.mode); got != tt.want {
+				t.Errorf("validMode() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

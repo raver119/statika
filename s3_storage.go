@@ -11,12 +11,27 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"io"
 	"io/ioutil"
+	"log"
 	"strings"
 )
 
 type S3Storage struct {
 	bucket    string
 	awsConfig *aws.Config
+	s3client  *s3.S3
+	mode      string
+}
+
+var allowedAccessModes = []string{"private", "public-read", "public-read-write", "authenticated-read"}
+
+func validMode(mode string) bool {
+	for _, v := range allowedAccessModes {
+		if v == mode {
+			return true
+		}
+	}
+
+	return false
 }
 
 func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, err error) {
@@ -29,7 +44,19 @@ func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, e
 		Region:      aws.String(region),
 	}
 
-	return S3Storage{bucket: bucket, awsConfig: s3Config}, nil
+	// private by default
+	mode := GetEnvOrDefault("ACL", "private")
+	if !validMode(mode) {
+		return S3Storage{}, fmt.Errorf("unknown ACL provided: [%v]", mode)
+	}
+
+	// this client will be reused
+	c, err := buildClient(s3Config)
+	if err != nil {
+		return S3Storage{}, err
+	}
+
+	return S3Storage{bucket: bucket, awsConfig: s3Config, s3client: c, mode: mode}, nil
 }
 
 // endpoint looks like "https://nyc3.digitaloceanspaces.com", region is hardcoded
@@ -41,14 +68,18 @@ func (s S3Storage) Name() string {
 	return "S3 storage"
 }
 
-func (s S3Storage) client() (c *s3.S3, err error) {
-	newSession, err := session.NewSession(s.awsConfig)
+func buildClient(awsConfig *aws.Config) (c *s3.S3, err error) {
+	newSession, err := session.NewSession(awsConfig)
 	if err != nil {
 		return nil, err
 	}
 
 	c = s3.New(newSession)
 	return
+}
+
+func (s S3Storage) client() (c *s3.S3, err error) {
+	return s.s3client, nil
 }
 
 func (s S3Storage) Get(bucket string, name string) (r CloseableReader, err error) {
@@ -64,6 +95,7 @@ func (s S3Storage) Get(bucket string, name string) (r CloseableReader, err error
 
 	result, err := c.GetObject(input)
 	if err != nil {
+		log.Printf("Error: %v", err)
 		return nil, err
 	}
 
@@ -81,9 +113,9 @@ func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName st
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(bucket + "/" + name),
 		Body:   r,
-		ACL:    aws.String("private"), // all files will be accessed through proxy anyway
+		ACL:    aws.String(s.mode),
 		Metadata: map[string]*string{
-			"x-amz-meta-my-key": aws.String("your-value"), //required
+			"x-amz-meta-my-key": aws.String("your-value"), //required?
 		},
 	}
 
