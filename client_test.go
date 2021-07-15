@@ -41,6 +41,9 @@ func TestClient_UploadFile(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, response.StatusCode)
 
+	// server-timing header field must be present
+	assert.Contains(t, response.Header.Get("Server-Timing"), "Storage READ")
+
 	body, err := ioutil.ReadAll(response.Body)
 	require.NoError(t, err)
 	assert.Equal(t, content, string(body))
