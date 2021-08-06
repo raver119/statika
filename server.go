@@ -18,7 +18,6 @@ type Engine struct {
 	port int
 
 	// all fields below will be instantiated internally
-	pa           PersistenceAgent
 	router       *mux.Router
 	static       *http.Server
 	handlers     *ApiHandler
@@ -28,8 +27,6 @@ type Engine struct {
 }
 
 func CreateEngine(keyMaster string, keyUpload string, storage *Storage, port int) (e Engine, err error) {
-	mh := GetEnvOrDefault("MEMCACHED_HOST", "localhost")
-	pa, err := NewPersistenceAgent(mh, 11211)
 	if err != nil {
 		return
 	}
@@ -39,7 +36,7 @@ func CreateEngine(keyMaster string, keyUpload string, storage *Storage, port int
 		return
 	}
 
-	router, err := buildRouter(handlers, storage, pa)
+	router, err := buildRouter(handlers, storage)
 	if err != nil {
 		return
 	}
@@ -49,14 +46,13 @@ func CreateEngine(keyMaster string, keyUpload string, storage *Storage, port int
 		keyMaster: keyMaster,
 		keyUpload: keyUpload,
 		port:      port,
-		pa:        pa,
 		srv:       &http.Server{Addr: ":" + strconv.Itoa(port), Handler: router},
 		wg:        &sync.WaitGroup{},
 	}
 	return
 }
 
-func buildRouter(handlers *ApiHandler, storage *Storage, pa PersistenceAgent) (router *mux.Router, err error) {
+func buildRouter(handlers *ApiHandler, storage *Storage) (router *mux.Router, err error) {
 	router = mux.NewRouter()
 
 	api := router.PathPrefix("/rest/v1").Subrouter()
@@ -72,7 +68,7 @@ func buildRouter(handlers *ApiHandler, storage *Storage, pa PersistenceAgent) (r
 	api.HandleFunc("/meta/{bucket}/{fileName}", CorsHandler(handlers.DeleteMeta)).Methods(http.MethodDelete, http.MethodOptions)
 
 	// catch-all handler for static files serving
-	catcher, err := NewCatcher(storage, pa)
+	catcher, err := NewCatcher(storage)
 	if err != nil {
 		return
 	}
