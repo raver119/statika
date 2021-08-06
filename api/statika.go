@@ -82,7 +82,7 @@ func (gk GateKeeper) IssueUploadToken(bucket string) (token UploadToken, err err
 	}
 
 	if resp.StatusCode() != http.StatusOK {
-		err = fmt.Errorf("statika request failed with statusCode %v", resp.StatusCode())
+		err = fmt.Errorf("statika request failed with statusCode %v; message: [%v]", resp.StatusCode(), resp.String())
 		return
 	}
 

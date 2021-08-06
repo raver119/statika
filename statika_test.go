@@ -27,8 +27,25 @@ func TestGateKeeper_IssueUploadToken(t *testing.T) {
 	gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
 	require.NoError(t, err)
 
-	_, err = gk.IssueUploadToken("test_bucket")
+	token, err := gk.IssueUploadToken("test_bucket")
 	require.NoError(t, err)
+	//log.Printf("Token: <%v>", token)
+
+	// now confirm token is actually valid and has access to the bucket
+	tokenizer := NewTokenizer()
+	ok, err := tokenizer.ValidateUploadToken(string(token), "test_bucket")
+	require.NoError(t, err)
+	require.True(t, ok)
+
+	// now test bad bucket
+	ok, err = tokenizer.ValidateUploadToken(string(token), "wrong_bucket")
+	require.NoError(t, err)
+	require.False(t, ok)
+
+	// now bad token
+	ok, err = tokenizer.ValidateUploadToken("ab"+string(token), "test_bucket")
+	require.Error(t, err)
+	require.False(t, ok)
 }
 
 func TestGateKeeper_IssueUploadToken_2(t *testing.T) {

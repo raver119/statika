@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/cristalhq/jwt/v3"
 	"github.com/google/uuid"
+	"strings"
 	"time"
 )
 
@@ -17,6 +19,7 @@ type Tokenizer struct {
 }
 
 func NewTokenizer() Tokenizer {
+	//log.Printf("KEY: %v", k)
 	return Tokenizer{key: []byte(GetEnvOrPanic("MASTER_KEY"))}
 }
 
@@ -28,6 +31,13 @@ func (t Tokenizer) CreateUploadToken(req UploadAuthenticationRequest) (token str
 
 	// TODO: once req.Bucket removed this will be removed as well
 	buckets := append(req.Buckets, req.Bucket)
+
+	// now validate buckets
+	for _, b := range buckets {
+		if b == "" {
+			return "", fmt.Errorf("empty bucket was requested")
+		}
+	}
 
 	claims := &uploadClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
@@ -49,6 +59,10 @@ func (t Tokenizer) CreateUploadToken(req UploadAuthenticationRequest) (token str
 }
 
 func (t Tokenizer) ValidateUploadToken(token string, bucket string) (ok bool, err error) {
+	if strings.HasPrefix(token, "Bearer ") {
+		token = strings.Replace(token, "Bearer ", "", 1)
+	}
+
 	verifier, err := jwt.NewVerifierHS(jwt.HS256, t.key)
 	if err != nil {
 		return false, err
@@ -69,6 +83,11 @@ func (t Tokenizer) ValidateUploadToken(token string, bucket string) (ok bool, er
 	err = json.Unmarshal(tkn.RawClaims(), &claims)
 	if err != nil {
 		return false, err
+	}
+
+	// ping is the only request that can get here
+	if bucket == "" {
+		return true, nil
 	}
 
 	for _, b := range claims.Buckets {

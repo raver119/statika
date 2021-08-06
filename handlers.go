@@ -24,7 +24,7 @@ type ApiHandler struct {
 }
 
 func NewApiHandler(masterKey string, userKey string, storage *Storage) (*ApiHandler, error) {
-	return &ApiHandler{masterKey: masterKey, userKey: userKey, storage: storage}, nil
+	return &ApiHandler{masterKey: masterKey, userKey: userKey, storage: storage, tokenizer: NewTokenizer()}, nil
 }
 
 func (srv *ApiHandler) validateUploadToken(r *http.Request, bucket string) (ok bool) {
