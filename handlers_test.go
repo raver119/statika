@@ -34,8 +34,8 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 
 	client := resty.New()
 
-	negativeAuthReq := UploadAuthenticationRequest{"bad upload key", TEST_B}
-	positiveAuthReq := UploadAuthenticationRequest{TEST_U, TEST_B}
+	negativeAuthReq := UploadAuthenticationRequest{Token: "bad upload key", Bucket: TEST_B}
+	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
 
 	// negative test
 	resp, err := client.R().
@@ -117,7 +117,7 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	client := resty.New()
 
-	positiveAuthReq := UploadAuthenticationRequest{TEST_U, TEST_B}
+	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -208,7 +208,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := resty.New()
-	positiveAuthReq := UploadAuthenticationRequest{TEST_U, TEST_B}
+	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -257,7 +257,7 @@ func TestApiHandler_List(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := resty.New()
-	positiveAuthReq := UploadAuthenticationRequest{TEST_U, randomBucket}
+	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: randomBucket}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -313,7 +313,7 @@ func TestApiHandler_Meta(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := resty.New()
-	positiveAuthReq := UploadAuthenticationRequest{TEST_U, randomBucket}
+	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: randomBucket}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).

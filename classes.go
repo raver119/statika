@@ -22,8 +22,9 @@ type MasterAuthenticationRequest struct {
 }
 
 type UploadAuthenticationRequest struct {
-	Token  string `json:"token"`  // Auth token. Must match whatever was set in UPLOAD_TOKEN env var
-	Bucket string `json:"bucket"` // Target folder for this key. Other buckets will be hidden and unavailable.
+	Token   string   `json:"token"`   // Auth token. Must match whatever was set in UPLOAD_TOKEN env var
+	Bucket  string   `json:"bucket"`  //Deprecated field. Will be removed soon.
+	Buckets []string `json:"buckets"` // Target folder for this key. Other buckets will be hidden and unavailable.
 }
 
 type AuthenticationResponse struct {

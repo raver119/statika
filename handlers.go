@@ -19,14 +19,12 @@ type ApiHandler struct {
 	masterKey string
 	userKey   string
 
-	pa      PersistenceAgent
-	storage *Storage
+	storage   *Storage
+	tokenizer Tokenizer
 }
 
 func NewApiHandler(masterKey string, userKey string, storage *Storage) (*ApiHandler, error) {
-	mh := GetEnvOrDefault("MEMCACHED_HOST", "localhost")
-	pa, err := NewPersistenceAgent(mh, 11211)
-	return &ApiHandler{pa: pa, masterKey: masterKey, userKey: userKey, storage: storage}, err
+	return &ApiHandler{masterKey: masterKey, userKey: userKey, storage: storage}, nil
 }
 
 func (srv *ApiHandler) validateUploadToken(r *http.Request, bucket string) (ok bool) {
@@ -38,10 +36,11 @@ func (srv *ApiHandler) validateUploadToken(r *http.Request, bucket string) (ok b
 		}
 	}
 
-	if len(bucket) > 0 {
-		return srv.pa.CheckUploadToken(token, bucket)
+	ok, err := srv.tokenizer.ValidateUploadToken(token, bucket)
+	if ok && err == nil {
+		return ok
 	} else {
-		return srv.pa.TouchUploadToken(token)
+		return false
 	}
 }
 
@@ -68,14 +67,14 @@ func (srv *ApiHandler) LoginUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create upload token
-	token, err := srv.pa.CreateUploadToken(req)
+	token, err := srv.tokenizer.CreateUploadToken(req)
 	if !OptionallyReport("unable to create upload token", w, err) {
 		return
 	}
 
 	response := AuthenticationResponse{
 		Token:   token,
-		Expires: time.Now().Unix() + int64(srv.pa.Expiration()-60),
+		Expires: time.Now().Unix() + 86400*365,
 	}
 
 	// and send it back

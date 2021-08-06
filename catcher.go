@@ -8,12 +8,12 @@ import (
 )
 
 type Catcher struct {
-	storage *Storage
-	pa      PersistenceAgent
+	storage   *Storage
+	tokenizer Tokenizer
 }
 
-func NewCatcher(storage *Storage, pa PersistenceAgent) (c Catcher, err error) {
-	return Catcher{storage: storage, pa: pa}, nil
+func NewCatcher(storage *Storage) (c Catcher, err error) {
+	return Catcher{storage: storage, tokenizer: NewTokenizer()}, nil
 }
 
 /*
@@ -83,7 +83,7 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// delete method
 		// validate access first
 		authToken := r.Header.Get("Authorization")
-		ok := c.pa.CheckUploadToken(authToken, bucket)
+		ok, _ := c.tokenizer.ValidateUploadToken(authToken, bucket)
 		if !ok {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
@@ -91,6 +91,6 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		_ = (*c.storage).Delete(bucket, fileName)
 		w.WriteHeader(http.StatusOK)
-		w.Write(responseOK())
+		_, _ = w.Write(responseOK())
 	}
 }
