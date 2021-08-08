@@ -3,7 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/cristalhq/jwt/v3"
 	"github.com/go-resty/resty/v2"
+	. "github.com/raver119/statika/wt"
 	"net/http"
 )
 
@@ -59,13 +61,49 @@ func (gk GateKeeper) NewClient(bucket string, uploadToken UploadToken) (Client, 
 	}, nil
 }
 
-func (gk GateKeeper) IssueUploadToken(bucket string) (token UploadToken, err error) {
+func (gk GateKeeper) NewMultiClient(uploadToken UploadToken, buckets ...string) (MultiClient, error) {
+	// validate buckets
+	tkn, err := jwt.ParseString(string(uploadToken))
+	if err != nil {
+		return MultiClient{}, err
+	}
+
+	var claims UploadClaims
+	err = json.Unmarshal(tkn.RawClaims(), &claims)
+	if err != nil {
+		return MultiClient{}, err
+	}
+
+	exists := func(needle string, haystack []string) bool {
+		for _, h := range haystack {
+			if h == needle {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, qb := range buckets {
+		if !exists(qb, claims.Buckets) {
+			return MultiClient{}, fmt.Errorf("non-approved bucket was requested")
+		}
+	}
+
+	return MultiClient{
+		endpoint:    gk.endpoint,
+		uploadToken: uploadToken,
+		buckets:     buckets,
+		resty:       gk.restClient,
+	}, nil
+}
+
+func (gk GateKeeper) IssueUploadToken(bucket ...string) (token UploadToken, err error) {
 	endpoint := fmt.Sprintf("%v/rest/v1/auth/upload", gk.endpoint)
 	client := resty.New()
 
 	upReq := UploadAuthenticationRequest{
-		Token:  gk.uploadKey,
-		Bucket: bucket,
+		Token:   gk.uploadKey,
+		Buckets: bucket,
 	}
 
 	resp, err := client.R().

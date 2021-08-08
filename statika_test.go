@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/raver119/statika/api"
+	"github.com/raver119/statika/wt"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
@@ -32,7 +33,7 @@ func TestGateKeeper_IssueUploadToken(t *testing.T) {
 	//log.Printf("Token: <%v>", token)
 
 	// now confirm token is actually valid and has access to the bucket
-	tokenizer := NewTokenizer()
+	tokenizer := wt.NewTokenizer()
 	ok, err := tokenizer.ValidateUploadToken(string(token), "test_bucket")
 	require.NoError(t, err)
 	require.True(t, ok)

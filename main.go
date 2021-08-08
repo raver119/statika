@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/raver119/statika/utils"
 	"log"
 	"os"
 	"strconv"
@@ -30,18 +31,18 @@ func main() {
 	/*
 		By default port 8080 is used
 	*/
-	strPort := GetEnvOrDefault("STATIKA_PORT", "9191")
+	strPort := utils.GetEnvOrDefault("STATIKA_PORT", "9191")
 	port, err := strconv.Atoi(strPort)
 	if err != nil {
 		panic(err)
 	}
 
 	if _, ok := os.LookupEnv("S3_BUCKET"); ok {
-		bucket := GetEnvOrPanic("S3_BUCKET")
-		region := GetEnvOrPanic("S3_REGION")
-		endpoint := GetEnvOrPanic("S3_ENDPOINT")
-		_ = GetEnvOrPanic("S3_KEY")
-		_ = GetEnvOrPanic("S3_SECRET")
+		bucket := utils.GetEnvOrPanic("S3_BUCKET")
+		region := utils.GetEnvOrPanic("S3_REGION")
+		endpoint := utils.GetEnvOrPanic("S3_ENDPOINT")
+		_ = utils.GetEnvOrPanic("S3_KEY")
+		_ = utils.GetEnvOrPanic("S3_SECRET")
 		storage, err = NewS3Storage(bucket, endpoint, region)
 		if err != nil {
 			panic(err)
