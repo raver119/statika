@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/google/uuid"
+	"github.com/raver119/statika/classes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
@@ -67,7 +68,7 @@ func TestLocalStorage_List(t *testing.T) {
 
 	files, err := ls.List(bucket)
 	require.NoError(t, err)
-	assert.Equal(t, []FileEntry{{FileName: "test1.txt"}, {FileName: "test2.txt"}}, files)
+	assert.Equal(t, []classes.FileEntry{{FileName: "test1.txt"}, {FileName: "test2.txt"}}, files)
 
 	assert.NoError(t, ls.Delete(bucket, "test1.txt"))
 	assert.NoError(t, ls.Delete(bucket, "test2.txt"))
@@ -78,7 +79,7 @@ func TestLocalStorage_GetMeta(t *testing.T) {
 	//testString := "test string"
 	ls := NewLocalStorage("/tmp")
 
-	meta := MetaInfo{
+	meta := classes.MetaInfo{
 		"alpha": "1",
 		"beta":  "2",
 	}
@@ -94,5 +95,5 @@ func TestLocalStorage_GetMeta(t *testing.T) {
 
 	restored, err = ls.GetMeta(bucket, fileName)
 	require.NoError(t, err)
-	require.Equal(t, MetaInfo{}, restored)
+	require.Equal(t, classes.MetaInfo{}, restored)
 }

@@ -1,4 +1,4 @@
-package main
+package classes
 
 import (
 	"encoding/json"
@@ -84,6 +84,6 @@ func (ar ApiResponse) ToJSON() []byte {
 	return js
 }
 
-func responseOK() []byte {
+func ResponseOK() []byte {
 	return ApiResponse{StatusCode: http.StatusOK}.ToJSON()
 }

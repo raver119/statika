@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/raver119/statika/classes"
+	"github.com/raver119/statika/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
@@ -9,7 +11,7 @@ import (
 )
 
 func TestS3Storage_Get(t *testing.T) {
-	spacesBucket := GetEnvOrDefault("S3_BUCKET", "")
+	spacesBucket := utils.GetEnvOrDefault("S3_BUCKET", "")
 	storage, err := NewSpacesStorage(spacesBucket, "https://nyc3.digitaloceanspaces.com")
 	require.NoError(t, err)
 
@@ -29,7 +31,7 @@ func TestS3Storage_Get(t *testing.T) {
 }
 
 func TestS3Storage_List(t *testing.T) {
-	spacesBucket := GetEnvOrDefault("S3_BUCKET", "")
+	spacesBucket := utils.GetEnvOrDefault("S3_BUCKET", "")
 	storage, err := NewSpacesStorage(spacesBucket, "https://nyc3.digitaloceanspaces.com")
 	require.NoError(t, err)
 
@@ -52,11 +54,11 @@ func TestS3Storage_List(t *testing.T) {
 }
 
 func TestS3Storage_GetMeta(t *testing.T) {
-	spacesBucket := GetEnvOrDefault("S3_BUCKET", "")
+	spacesBucket := utils.GetEnvOrDefault("S3_BUCKET", "")
 	storage, err := NewSpacesStorage(spacesBucket, "https://nyc3.digitaloceanspaces.com")
 	require.NoError(t, err)
 
-	meta := MetaInfo{
+	meta := classes.MetaInfo{
 		"alpha": "1",
 		"beta":  "2",
 	}

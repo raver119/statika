@@ -1,8 +1,9 @@
-package main
+package utils
 
 import (
 	"encoding/base64"
 	"fmt"
+	. "github.com/raver119/statika/classes"
 	"io"
 	"net/http"
 	"os"

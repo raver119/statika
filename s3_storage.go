@@ -9,6 +9,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/raver119/statika/classes"
+	"github.com/raver119/statika/utils"
 	"io"
 	"io/ioutil"
 	"log"
@@ -35,8 +37,8 @@ func validMode(mode string) bool {
 }
 
 func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, err error) {
-	spacesKey := GetEnvOrDefault("S3_KEY", "")
-	spacesSecret := GetEnvOrDefault("S3_SECRET", "")
+	spacesKey := utils.GetEnvOrDefault("S3_KEY", "")
+	spacesSecret := utils.GetEnvOrDefault("S3_SECRET", "")
 
 	s3Config := &aws.Config{
 		Credentials: credentials.NewStaticCredentials(spacesKey, spacesSecret, ""),
@@ -45,7 +47,7 @@ func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, e
 	}
 
 	// private by default
-	mode := GetEnvOrDefault("ACL", "private")
+	mode := utils.GetEnvOrDefault("ACL", "private")
 	if !validMode(mode) {
 		return S3Storage{}, fmt.Errorf("unknown ACL provided: [%v]", mode)
 	}
@@ -82,7 +84,7 @@ func (s S3Storage) client() (c *s3.S3, err error) {
 	return s.s3client, nil
 }
 
-func (s S3Storage) Get(bucket string, name string) (r CloseableReader, err error) {
+func (s S3Storage) Get(bucket string, name string) (r classes.CloseableReader, err error) {
 	c, err := s.client()
 	if err != nil {
 		return nil, err
@@ -123,7 +125,7 @@ func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName st
 	return fmt.Sprintf("%v/%v", bucket, name), err
 }
 
-func (s S3Storage) List(bucket string) (f []FileEntry, err error) {
+func (s S3Storage) List(bucket string) (f []classes.FileEntry, err error) {
 	c, err := s.client()
 	if err != nil {
 		return nil, err
@@ -141,7 +143,7 @@ func (s S3Storage) List(bucket string) (f []FileEntry, err error) {
 
 	for _, obj := range objects.Contents {
 		// strip bucket name from the file name
-		f = append(f, FileEntry{FileName: strings.Replace(aws.StringValue(obj.Key), bucket+"/", "", 1)})
+		f = append(f, classes.FileEntry{FileName: strings.Replace(aws.StringValue(obj.Key), bucket+"/", "", 1)})
 	}
 
 	return
@@ -162,19 +164,19 @@ func (s S3Storage) Delete(bucket string, name string) (err error) {
 	return err
 }
 
-func (s S3Storage) PutMeta(bucket string, filename string, meta MetaInfo) (err error) {
+func (s S3Storage) PutMeta(bucket string, filename string, meta classes.MetaInfo) (err error) {
 	b, _ := json.Marshal(meta)
-	_, err = s.Put(bucket, filename+META_EXTENSION, bytes.NewReader(b))
+	_, err = s.Put(bucket, filename+classes.META_EXTENSION, bytes.NewReader(b))
 	return
 }
 
-func (s S3Storage) GetMeta(bucket string, filename string) (meta MetaInfo, err error) {
-	b, err := s.Get(bucket, filename+META_EXTENSION)
+func (s S3Storage) GetMeta(bucket string, filename string) (meta classes.MetaInfo, err error) {
+	b, err := s.Get(bucket, filename+classes.META_EXTENSION)
 	if err != nil {
 		aerr, ok := err.(awserr.Error)
 		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
 			// just a 404, return empty MetaInfo
-			return MetaInfo{}, nil
+			return classes.MetaInfo{}, nil
 		}
 		return nil, err
 	}
@@ -185,6 +187,6 @@ func (s S3Storage) GetMeta(bucket string, filename string) (meta MetaInfo, err e
 }
 
 func (s S3Storage) DeleteMeta(bucket string, filename string) (err error) {
-	err = s.Delete(bucket, filename+META_EXTENSION)
+	err = s.Delete(bucket, filename+classes.META_EXTENSION)
 	return
 }

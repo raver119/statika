@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"github.com/gorilla/mux"
+	"github.com/raver119/statika/utils"
 	"net/http"
 	"strconv"
 	"sync"
@@ -58,14 +59,14 @@ func buildRouter(handlers *ApiHandler, storage *Storage) (router *mux.Router, er
 	api := router.PathPrefix("/rest/v1").Subrouter()
 
 	// API endpoints
-	api.HandleFunc("/auth/upload", CorsHandler(handlers.LoginUpload)).Methods(http.MethodPost, http.MethodOptions)
-	api.HandleFunc("/auth/master", CorsHandler(handlers.LoginMaster)).Methods(http.MethodPost, http.MethodOptions)
-	api.HandleFunc("/ping", CorsHandler(handlers.Ping)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
-	api.HandleFunc("/file", CorsHandler(handlers.Upload)).Methods(http.MethodPost, http.MethodOptions)
-	api.HandleFunc("/files/{bucket}", CorsHandler(handlers.List)).Methods(http.MethodGet, http.MethodOptions)
-	api.HandleFunc("/meta/{bucket}/{fileName}", CorsHandler(handlers.GetMeta)).Methods(http.MethodGet, http.MethodOptions)
-	api.HandleFunc("/meta/{bucket}/{fileName}", CorsHandler(handlers.SetMeta)).Methods(http.MethodPost, http.MethodOptions)
-	api.HandleFunc("/meta/{bucket}/{fileName}", CorsHandler(handlers.DeleteMeta)).Methods(http.MethodDelete, http.MethodOptions)
+	api.HandleFunc("/auth/upload", utils.CorsHandler(handlers.LoginUpload)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/auth/master", utils.CorsHandler(handlers.LoginMaster)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/ping", utils.CorsHandler(handlers.Ping)).Methods(http.MethodGet, http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/file", utils.CorsHandler(handlers.Upload)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/files/{bucket}", utils.CorsHandler(handlers.List)).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/meta/{bucket}/{fileName}", utils.CorsHandler(handlers.GetMeta)).Methods(http.MethodGet, http.MethodOptions)
+	api.HandleFunc("/meta/{bucket}/{fileName}", utils.CorsHandler(handlers.SetMeta)).Methods(http.MethodPost, http.MethodOptions)
+	api.HandleFunc("/meta/{bucket}/{fileName}", utils.CorsHandler(handlers.DeleteMeta)).Methods(http.MethodDelete, http.MethodOptions)
 
 	// catch-all handler for static files serving
 	catcher, err := NewCatcher(storage)

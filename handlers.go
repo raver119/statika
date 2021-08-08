@@ -7,6 +7,9 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	. "github.com/raver119/statika/classes"
+	. "github.com/raver119/statika/utils"
+	. "github.com/raver119/statika/wt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -128,7 +131,7 @@ func (srv *ApiHandler) SetMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = w.Write(responseOK())
+	_, _ = w.Write(ResponseOK())
 }
 
 /*
@@ -144,7 +147,7 @@ func (srv *ApiHandler) DeleteMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, _ = w.Write(responseOK())
+	_, _ = w.Write(ResponseOK())
 }
 
 func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
@@ -155,7 +158,7 @@ func (srv *ApiHandler) Ping(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(responseOK())
+	_, _ = w.Write(ResponseOK())
 }
 
 func (srv *ApiHandler) processUpload(bucket string, fileName string, reader io.ReadSeeker, w http.ResponseWriter) (ur UploadResponse, err error) {

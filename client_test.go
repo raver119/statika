@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/google/uuid"
 	"github.com/raver119/statika/api"
+	"github.com/raver119/statika/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
@@ -60,10 +61,10 @@ func TestClient_UploadFile(t *testing.T) {
 }
 
 func TestClient_ListFiles(t *testing.T) {
-	bucket := GetEnvOrPanic("S3_BUCKET")
-	ep := GetEnvOrDefault("S3_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
-	_ = GetEnvOrPanic("S3_KEY")
-	_ = GetEnvOrPanic("S3_SECRET")
+	bucket := utils.GetEnvOrPanic("S3_BUCKET")
+	ep := utils.GetEnvOrDefault("S3_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
+	_ = utils.GetEnvOrPanic("S3_KEY")
+	_ = utils.GetEnvOrPanic("S3_SECRET")
 	s3storage, err := NewSpacesStorage(bucket, ep)
 	require.NoError(t, err)
 
@@ -109,10 +110,10 @@ func TestClient_ListFiles(t *testing.T) {
 }
 
 func TestClient_Meta(t *testing.T) {
-	bucket := GetEnvOrPanic("S3_BUCKET")
-	ep := GetEnvOrDefault("S3_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
-	_ = GetEnvOrPanic("S3_KEY")
-	_ = GetEnvOrPanic("S3_SECRET")
+	bucket := utils.GetEnvOrPanic("S3_BUCKET")
+	ep := utils.GetEnvOrDefault("S3_ENDPOINT", "https://nyc3.digitaloceanspaces.com")
+	_ = utils.GetEnvOrPanic("S3_KEY")
+	_ = utils.GetEnvOrPanic("S3_SECRET")
 	s3storage, err := NewSpacesStorage(bucket, ep)
 	require.NoError(t, err)
 
@@ -128,7 +129,7 @@ func TestClient_Meta(t *testing.T) {
 				_ = e.Stop()
 			}()
 
-			testBucket := uuid.New().String()
+			testBucket := uuid.NewString()
 			gk, err := api.NewGateKeeper(endpoint, masterKey, uploadKey)
 			require.NoError(t, err)
 

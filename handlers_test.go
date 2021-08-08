@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/go-resty/resty/v2"
 	"github.com/google/uuid"
+	"github.com/raver119/statika/classes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io/ioutil"
@@ -34,8 +35,8 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 
 	client := resty.New()
 
-	negativeAuthReq := UploadAuthenticationRequest{Token: "bad upload key", Bucket: TEST_B}
-	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
+	negativeAuthReq := classes.UploadAuthenticationRequest{Token: "bad upload key", Bucket: TEST_B}
+	positiveAuthReq := classes.UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
 
 	// negative test
 	resp, err := client.R().
@@ -57,14 +58,14 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode())
 
-	var authResp AuthenticationResponse
+	var authResp classes.AuthenticationResponse
 	err = json.Unmarshal(resp.Body(), &authResp)
 	require.NoError(t, err)
 
 	fileContent := "file content"
 
 	// now try to upload file
-	positiveUploadReq := UploadRequest{
+	positiveUploadReq := classes.UploadRequest{
 		Filename: "file name.txt",
 		Bucket:   TEST_B,
 		Meta:     nil,
@@ -89,7 +90,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, resp.StatusCode())
 
-	var uploadResp UploadResponse
+	var uploadResp classes.UploadResponse
 	err = json.Unmarshal(resp.Body(), &uploadResp)
 	require.NoError(t, err)
 
@@ -117,7 +118,7 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	client := resty.New()
 
-	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
+	positiveAuthReq := classes.UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -126,13 +127,13 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, ar.StatusCode())
 
-	var authResp AuthenticationResponse
+	var authResp classes.AuthenticationResponse
 	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
 
 	originalContent := "my original content"
 	updatedContent := "my updated content"
 
-	positiveUploadReq := UploadRequest{
+	positiveUploadReq := classes.UploadRequest{
 		Filename: "somefile.txt",
 		Bucket:   TEST_B,
 		Meta:     nil,
@@ -147,11 +148,11 @@ func TestApiHandler_UpdateDelete(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, ur.StatusCode())
 
-	var uploadResp UploadResponse
+	var uploadResp classes.UploadResponse
 	require.NoError(t, json.Unmarshal(ur.Body(), &uploadResp))
 
 	// test update
-	positiveUploadReq = UploadRequest{
+	positiveUploadReq = classes.UploadRequest{
 		Filename: "somefile.txt",
 		Bucket:   TEST_B,
 		Meta:     nil,
@@ -208,7 +209,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := resty.New()
-	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
+	positiveAuthReq := classes.UploadAuthenticationRequest{Token: TEST_U, Bucket: TEST_B}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -216,7 +217,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ar.StatusCode())
 
-	var authResp AuthenticationResponse
+	var authResp classes.AuthenticationResponse
 	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
 
 	var content string = "another_file content"
@@ -231,7 +232,7 @@ func TestApiHandler_FormUpload(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ur.StatusCode(), string(ur.Body()))
 
-	var uploadResp UploadResponse
+	var uploadResp classes.UploadResponse
 	require.NoError(t, json.Unmarshal(ur.Body(), &uploadResp))
 
 	// test positive delete
@@ -257,7 +258,7 @@ func TestApiHandler_List(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := resty.New()
-	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: randomBucket}
+	positiveAuthReq := classes.UploadAuthenticationRequest{Token: TEST_U, Bucket: randomBucket}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -265,7 +266,7 @@ func TestApiHandler_List(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ar.StatusCode())
 
-	var authResp AuthenticationResponse
+	var authResp classes.AuthenticationResponse
 	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
 
 	ur, err := client.R().
@@ -294,10 +295,10 @@ func TestApiHandler_List(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, lr.StatusCode(), string(lr.Body()))
 
-	var listResp ListResponse
+	var listResp classes.ListResponse
 	require.NoError(t, json.Unmarshal(lr.Body(), &listResp))
 	require.Equal(t, randomBucket, listResp.Bucket)
-	require.Equal(t, []FileEntry{{FileName: "file1.txt"}, {FileName: "file2.txt"}}, listResp.Files)
+	require.Equal(t, []classes.FileEntry{{FileName: "file1.txt"}, {FileName: "file2.txt"}}, listResp.Files)
 }
 
 func TestApiHandler_Meta(t *testing.T) {
@@ -313,7 +314,7 @@ func TestApiHandler_Meta(t *testing.T) {
 	time.Sleep(time.Second)
 
 	client := resty.New()
-	positiveAuthReq := UploadAuthenticationRequest{Token: TEST_U, Bucket: randomBucket}
+	positiveAuthReq := classes.UploadAuthenticationRequest{Token: TEST_U, Bucket: randomBucket}
 
 	ar, err := client.R().
 		SetBody(positiveAuthReq).
@@ -321,10 +322,10 @@ func TestApiHandler_Meta(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, ar.StatusCode())
 
-	var authResp AuthenticationResponse
+	var authResp classes.AuthenticationResponse
 	require.NoError(t, json.Unmarshal(ar.Body(), &authResp))
 
-	meta := MetaInfo{
+	meta := classes.MetaInfo{
 		"alpha": "1",
 		"beta":  "2",
 	}
@@ -345,7 +346,7 @@ func TestApiHandler_Meta(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, gm.StatusCode())
 
-	var restored MetaInfo
+	var restored classes.MetaInfo
 	require.NoError(t, json.Unmarshal(gm.Body(), &restored))
 	assert.Equal(t, meta, restored)
 

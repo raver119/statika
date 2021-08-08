@@ -1,15 +1,17 @@
-package main
+package wt
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/cristalhq/jwt/v3"
 	"github.com/google/uuid"
+	. "github.com/raver119/statika/classes"
+	. "github.com/raver119/statika/utils"
 	"strings"
 	"time"
 )
 
-type uploadClaims struct {
+type UploadClaims struct {
 	jwt.RegisteredClaims
 	Buckets []string
 }
@@ -30,22 +32,24 @@ func (t Tokenizer) CreateUploadToken(req UploadAuthenticationRequest) (token str
 	}
 
 	// TODO: once req.Bucket removed this will be removed as well
-	buckets := append(req.Buckets, req.Bucket)
+	if req.Bucket != "" {
+		req.Buckets = append(req.Buckets, req.Bucket)
+	}
 
 	// now validate buckets
-	for _, b := range buckets {
+	for _, b := range req.Buckets {
 		if b == "" {
 			return "", fmt.Errorf("empty bucket was requested")
 		}
 	}
 
-	claims := &uploadClaims{
+	claims := &UploadClaims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			Audience: []string{"statika"},
 			ID:       uuid.NewString(),
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 		},
-		Buckets: buckets,
+		Buckets: req.Buckets,
 	}
 
 	builder := jwt.NewBuilder(signer)
@@ -79,7 +83,7 @@ func (t Tokenizer) ValidateUploadToken(token string, bucket string) (ok bool, er
 	}
 
 	// now validate the bucket
-	var claims uploadClaims
+	var claims UploadClaims
 	err = json.Unmarshal(tkn.RawClaims(), &claims)
 	if err != nil {
 		return false, err

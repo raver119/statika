@@ -3,6 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	. "github.com/raver119/statika/classes"
+	. "github.com/raver119/statika/utils"
+	. "github.com/raver119/statika/wt"
 	"net/http"
 	"strings"
 )
@@ -91,6 +94,6 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		_ = (*c.storage).Delete(bucket, fileName)
 		w.WriteHeader(http.StatusOK)
-		_, _ = w.Write(responseOK())
+		_, _ = w.Write(ResponseOK())
 	}
 }
