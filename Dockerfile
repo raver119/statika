@@ -18,9 +18,14 @@ RUN apt update && apt install -y ca-certificates
 
 COPY --from=builder /service/statika /application/statika
 
+# setup user that will be running the server
 RUN groupadd -r user && useradd -r -g user user
 RUN chown -R user.user /application
-USER user
 
-EXPOSE 8080
-CMD cd /application && ./statika
+# setup the default storage volume
+RUN mkdir /statika && chown user:user /statika
+VOLUME /statika
+
+USER user
+WORKDIR /application
+CMD ["./statika"]
