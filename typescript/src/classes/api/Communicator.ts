@@ -4,7 +4,7 @@ import {HttpException} from "../exceptions/HttpException";
 import {AuthenticationBean} from "./AuthenticationBean";
 import {EndpointsCoordinates} from "../system/EndpointsCoordinates";
 
-export type AuthType = AuthenticationBean | AuthenticationResponse
+export type AuthType = AuthenticationBean | AuthenticationResponse | undefined
 
 export const communicator = (storage: EndpointsCoordinates) => {
 
@@ -25,7 +25,7 @@ export const communicator = (storage: EndpointsCoordinates) => {
                     headers: {
                         'Accept': 'application/json',
                         'Content-Type': 'application/json',
-                        'Authorization': authToken.token
+                        'Authorization': authToken?.token
                     },
                     body: JSON.stringify(obj)
                 }).then(res => {
