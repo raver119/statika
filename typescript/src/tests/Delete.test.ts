@@ -2,17 +2,17 @@
  * @jest-environment node
  */
 
-import {Statika, pickDefined, testCoordinates, UploadResponse, AuthenticationBean, authenticationBean} from "../src";
+import {Statika, testCoordinates, UploadResponse, AuthenticationBean, authenticationBean} from "../index";
 import {authorizeUpload, httpGet} from "./helpers";
 import {beforeAll, test, expect} from "@jest/globals"
-import {HttpStatusCode} from "../src/classes/entities/HttpStatusCode";
+import {HttpStatusCode} from "../classes/entities/HttpStatusCode";
 
-const UPLOAD_KEY = "TEST_UPLOAD_KEY"
+const UPLOAD_KEY = process.env.UPLOAD_KEY ?? "TEST_UPLOAD_KEY"
 const TEST_BUCKET = "test_bucket"
 const EVIL_BUCKET = "evil_bucket"
 
-const host = pickDefined(process.env.API_NODE, "127.0.0.1")
-const port = pickDefined(process.env.API_PORT, "9191")
+const host = process.env.API_NODE ?? "127.0.0.1"
+const port = process.env.API_PORT ?? "9191"
 
 const enc = new TextEncoder()
 let goodBean: AuthenticationBean

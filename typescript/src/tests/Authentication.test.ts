@@ -3,14 +3,14 @@
  */
 
 import {beforeAll, test, expect} from "@jest/globals"
-import {Statika, responseOk, pickDefined, testCoordinates, AuthenticationBean, authenticationBean} from "../src";
+import {Statika, responseOk, testCoordinates, AuthenticationBean, authenticationBean} from "../index";
 import {authorizeUpload} from "./helpers";
 
-const UPLOAD_KEY = "TEST_UPLOAD_KEY"
+const UPLOAD_KEY = process.env.UPLOAD_KEY ?? "TEST_UPLOAD_KEY"
 const TEST_BUCKET = "test_bucket"
 
-const host = pickDefined(process.env.API_NODE, "127.0.0.1")
-const port = pickDefined(process.env.API_PORT, "9191")
+const host = process.env.API_NODE ?? "127.0.0.1"
+const port = process.env.API_PORT ??  "9191"
 
 let uploadToken: string
 let bean: AuthenticationBean

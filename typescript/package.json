@@ -1,13 +1,13 @@
 {
   "name": "statika",
-  "version": "0.0.12",
+  "version": "0.0.15",
   "description": "Statika API",
   "main": "build/index.js",
   "typings": "build/index.d.ts",
   "scripts": {
     "check": "npm-check --skip-unused",
     "test": "jest --ci=true --watch",
-    "build": "tsc --build tsconfig.json",
+    "build": "tsc --build tsconfig.build.json",
     "test:ci": "jest --ci=true"
   },
   "keywords": [],
@@ -16,12 +16,12 @@
   "dependencies": {
     "@types/browser-or-node": "^1.2.0",
     "@types/btoa": "^1.2.3",
-    "@types/jest": "^26.0.15",
-    "@types/node": "^12.19.6",
+    "@types/jest": "^27.0.1",
+    "@types/node": "^16.9.1",
     "@types/uuid": "^8.3.0",
     "browser-or-node": "^1.3.0",
     "btoa": "^1.2.1",
-    "jest": "^27.0.6",
+    "jest": "^27.1.1",
     "scrypt-js": "^3.0.1",
     "ts-jest": "^27.0.3",
     "ts-node": "^10.1.0",

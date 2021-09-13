@@ -3,7 +3,7 @@
  */
 
 import {test, expect} from "@jest/globals"
-import {materializeMeta, metaInfo, pair, stringifyMeta} from "../src";
+import {materializeMeta, metaInfo, pair, stringifyMeta} from "../index";
 
 test("Utilities.test_meta_conversion", () => {
     const meta = metaInfo([pair("k1", "v1"),  pair("k2", "v2")])

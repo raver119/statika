@@ -2,13 +2,13 @@
  * @jest-environment node
  */
 
-import {Statika, pickDefined, testCoordinates, AuthenticationBean, authenticationBean, fileEntry} from "../src";
+import {Statika, pickDefined, testCoordinates, AuthenticationBean, authenticationBean, fileEntry} from "../index";
 import {authorizeUpload} from "./helpers";
 import {beforeAll, test, expect} from "@jest/globals"
 import {v4 as uuid} from "uuid";
 import 'whatwg-fetch'
 
-const UPLOAD_KEY = "TEST_UPLOAD_KEY"
+const UPLOAD_KEY = process.env.UPLOAD_KEY ?? "TEST_UPLOAD_KEY"
 const TEST_BUCKET = uuid()
 
 const host = pickDefined(process.env.API_NODE, "127.0.0.1")
