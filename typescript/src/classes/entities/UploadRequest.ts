@@ -1,5 +1,5 @@
 import { MetaType } from "../../Statika";
-import btoa from "btoa";
+import { fromByteArray } from "base64-js";
 
 export const bufferUploadRequest = (
   bucket: string,
@@ -11,7 +11,7 @@ export const bufferUploadRequest = (
     filename: fileName,
     bucket: bucket,
     meta: meta,
-    payload: btoa(String.fromCharCode(...new Uint8Array(buffer))),
+    payload: fromByteArray(new Uint8Array(buffer)),
   };
 };
 

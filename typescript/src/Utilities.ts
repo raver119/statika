@@ -29,3 +29,28 @@ export const materializeMeta = (meta: any): MetaType => {
 
   return clone;
 };
+
+export const randomFloat = (min: number, max: number): number => {
+  if (max < min) throw new Error(`Min <${min}> shouldn't be > Max <${max}>`);
+
+  if (max === min) return max;
+
+  max = max - 1;
+  return Math.random() * (max - min) + min;
+};
+
+export const randomInt = (min: number, max: number): number => {
+  return Math.round(randomFloat(min, max));
+};
+
+export function makeRandomString(length: number): string {
+  const charSet = "abcdedfghijklmnopqrstuvwzyz01234567890\nABSC JKW";
+
+  let b: string = "";
+  for (let i = 0; i < length; i++) {
+    const random = randomInt(0, charSet.length);
+    b = `${b}${charSet[random]}`;
+  }
+
+  return b;
+}
