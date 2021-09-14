@@ -1,7 +1,7 @@
-import {HttpException} from "./HttpException";
+import { HttpException } from "./HttpException";
 
 export class AuthenticationException extends HttpException {
-    constructor(message: string) {
-        super(message, 401);
-    }
+  constructor(message: string) {
+    super(message, 401);
+  }
 }

@@ -1,6 +1,5 @@
-
 export const fileEntry = (fileName: string) => ({
-    filename: fileName
-})
+  filename: fileName,
+});
 
-export type FileEntry = ReturnType<typeof fileEntry>
+export type FileEntry = ReturnType<typeof fileEntry>;

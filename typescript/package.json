@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "typings": "build/index.d.ts",
   "scripts": {
-    "check": "npm-check --skip-unused",
+    "format": "prettier --write \"**/*.ts\"",
     "test": "jest --ci=true --watch",
     "build": "tsc --build tsconfig.build.json",
     "test:ci": "jest --ci=true"
@@ -31,6 +31,7 @@
     "whatwg-fetch": "^3.6.2"
   },
   "devDependencies": {
+    "prettier": "^2.4.0"
   },
   "resolutions": {
   },
