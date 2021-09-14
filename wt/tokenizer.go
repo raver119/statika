@@ -3,12 +3,13 @@ package wt
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/cristalhq/jwt/v3"
 	"github.com/google/uuid"
 	. "github.com/raver119/statika/classes"
 	. "github.com/raver119/statika/utils"
-	"strings"
-	"time"
 )
 
 type UploadClaims struct {
@@ -18,6 +19,11 @@ type UploadClaims struct {
 
 type Tokenizer struct {
 	key []byte
+}
+
+func DevTokenizer(key string) Tokenizer {
+	//log.Printf("KEY: %v", k)
+	return Tokenizer{key: []byte(key)}
 }
 
 func NewTokenizer() Tokenizer {

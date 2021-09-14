@@ -5,21 +5,33 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
-	"github.com/google/uuid"
-	"github.com/raver119/statika/classes"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/go-resty/resty/v2"
+	"github.com/google/uuid"
+	"github.com/raver119/statika/classes"
+	"github.com/raver119/statika/wt"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const TEST_B = "my_test_bucket"
 const TEST_P = 9191
+
+func TestApiHandler_Login(t *testing.T) {
+	token, err := wt.DevTokenizer("alpha").CreateUploadToken(classes.UploadAuthenticationRequest{
+		Buckets: []string{"css"},
+	})
+
+	require.NoError(t, err)
+	log.Printf("Token: %v", token)
+}
 
 /*
 	This test validates login + file upload procedure
