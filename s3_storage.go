@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"log"
+	"strings"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -11,10 +16,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/raver119/statika/classes"
 	"github.com/raver119/statika/utils"
-	"io"
-	"io/ioutil"
-	"log"
-	"strings"
 )
 
 type S3Storage struct {
@@ -95,6 +96,7 @@ func (s S3Storage) Get(bucket string, name string) (r classes.CloseableReader, e
 		Key:    aws.String(bucket + "/" + name),
 	}
 
+	// TODO: add File Not Found here
 	result, err := c.GetObject(input)
 	if err != nil {
 		log.Printf("Error: %v", err)

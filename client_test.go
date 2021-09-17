@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/google/uuid"
-	"github.com/raver119/statika/api"
-	"github.com/raver119/statika/utils"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"net/http"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/raver119/statika/api"
+	"github.com/raver119/statika/utils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestClient_UploadFile(t *testing.T) {
@@ -95,13 +96,16 @@ func TestClient_ListFiles(t *testing.T) {
 			_, err = client.UploadFile("file5.txt", strings.NewReader(content))
 			require.NoError(t, err)
 
-			_, err = client.UploadFile("file6.txt", strings.NewReader(content))
+			_, err = client.UploadFile("nested/file6.txt", strings.NewReader(content))
+			require.NoError(t, err)
+
+			_, err = client.UploadFile("/nested/sub/file7.txt", strings.NewReader(content))
 			require.NoError(t, err)
 
 			files, err := client.ListFiles()
 			require.NoError(t, err)
 
-			require.Equal(t, []api.FileEntry{{"file5.txt"}, {"file6.txt"}}, files)
+			require.Equal(t, []api.FileEntry{{FileName: "file5.txt"}, {FileName: "nested/file6.txt"}, {FileName: "nested/sub/file7.txt"}}, files)
 
 			// ping must succeed
 			require.NoError(t, client.Ping())

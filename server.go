@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/gorilla/mux"
-	"github.com/raver119/statika/utils"
 	"net/http"
 	"strconv"
 	"sync"
+
+	"github.com/gorilla/mux"
+	"github.com/raver119/statika/utils"
 )
 
 type Engine struct {
@@ -18,10 +19,6 @@ type Engine struct {
 
 	port int
 
-	// all fields below will be instantiated internally
-	router       *mux.Router
-	static       *http.Server
-	handlers     *ApiHandler
 	srv          *http.Server
 	wg           *sync.WaitGroup
 	startedAsync bool

@@ -1,13 +1,16 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"strings"
+	"testing"
+
 	"github.com/google/uuid"
 	"github.com/raver119/statika/classes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
-	"strings"
-	"testing"
 )
 
 func TestLocalStorage_Get(t *testing.T) {
@@ -23,6 +26,7 @@ func TestLocalStorage_Get(t *testing.T) {
 	assert.NoError(t, err)
 
 	bytes, err := ioutil.ReadAll(r)
+	require.NoError(t, err)
 	assert.Equal(t, testString, string(bytes))
 	assert.NoError(t, r.Close())
 }
@@ -55,7 +59,7 @@ func TestLocalStorage_Delete(t *testing.T) {
 }
 
 func TestLocalStorage_List(t *testing.T) {
-	bucket := "random_bucket_name"
+	bucket := uuid.NewString()
 	testString := "test string"
 	ls := NewLocalStorage("/tmp")
 
@@ -75,8 +79,7 @@ func TestLocalStorage_List(t *testing.T) {
 }
 
 func TestLocalStorage_GetMeta(t *testing.T) {
-	bucket := uuid.New().String()
-	//testString := "test string"
+	bucket := uuid.NewString()
 	ls := NewLocalStorage("/tmp")
 
 	meta := classes.MetaInfo{
@@ -96,4 +99,43 @@ func TestLocalStorage_GetMeta(t *testing.T) {
 	restored, err = ls.GetMeta(bucket, fileName)
 	require.NoError(t, err)
 	require.Equal(t, classes.MetaInfo{}, restored)
+}
+
+func TestLocalStorage_NestedFolders(t *testing.T) {
+	bucket := uuid.NewString()
+	ls := NewLocalStorage("/tmp")
+
+	fileNames := []string{"nested/file.txt", "nested/deeper/file.txt"}
+
+	meta := classes.MetaInfo{
+		"alpha": "1",
+		"beta":  "2",
+	}
+
+	for _, fileName := range fileNames {
+		fname, err := ls.Put(bucket, fileName, strings.NewReader("test"))
+		log.Printf("Processing uploaded file: %v", fname)
+		require.NoError(t, err)
+		require.FileExists(t, fmt.Sprintf("/tmp/%v", fname))
+		require.NoError(t, ls.PutMeta(bucket, fileName, meta))
+
+		reader, err := ls.Get(bucket, fileName)
+		require.NoError(t, err)
+
+		restored, err := ls.GetMeta(bucket, fileName)
+		require.NoError(t, err)
+		assert.Equal(t, meta, restored)
+
+		body, err := ioutil.ReadAll(reader)
+		require.NoError(t, err)
+		require.Equal(t, "test", string(body))
+
+		require.NoError(t, ls.Delete(bucket, fileName))
+		require.NoFileExists(t, fmt.Sprintf("/tmp/%v", fname))
+
+		// once file removed Meta should be gone as well
+		restored, err = ls.GetMeta(bucket, fileName)
+		require.NoError(t, err)
+		require.Equal(t, classes.MetaInfo{}, restored)
+	}
 }
