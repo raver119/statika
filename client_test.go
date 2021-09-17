@@ -99,10 +99,13 @@ func TestClient_ListFiles(t *testing.T) {
 			_, err = client.UploadFile("nested/file6.txt", strings.NewReader(content))
 			require.NoError(t, err)
 
+			_, err = client.UploadFile("/nested/sub/file7.txt", strings.NewReader(content))
+			require.NoError(t, err)
+
 			files, err := client.ListFiles()
 			require.NoError(t, err)
 
-			require.Equal(t, []api.FileEntry{{FileName: "file5.txt"}, {FileName: "nested/file6.txt"}}, files)
+			require.Equal(t, []api.FileEntry{{FileName: "file5.txt"}, {FileName: "nested/file6.txt"}, {FileName: "nested/sub/file7.txt"}}, files)
 
 			// ping must succeed
 			require.NoError(t, client.Ping())
