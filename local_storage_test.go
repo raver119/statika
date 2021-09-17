@@ -26,6 +26,7 @@ func TestLocalStorage_Get(t *testing.T) {
 	assert.NoError(t, err)
 
 	bytes, err := ioutil.ReadAll(r)
+	require.NoError(t, err)
 	assert.Equal(t, testString, string(bytes))
 	assert.NoError(t, r.Close())
 }

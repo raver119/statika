@@ -48,7 +48,7 @@ func (s LocalStorage) prepareFolder(bucket string) (err error) {
 func (s LocalStorage) Get(bucket string, name string) (r classes.CloseableReader, err error) {
 	path := s.rootFolder + "/" + utils.MasterFileName(bucket, name)
 	if !utils.FileExists(path, true) {
-		err = fmt.Errorf("requested file doesn't exist: [%v/%v]", bucket, name)
+		err = errNotFound
 		return
 	}
 

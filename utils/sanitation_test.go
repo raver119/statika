@@ -121,3 +121,32 @@ func TestExtractExtension(t *testing.T) {
 		})
 	}
 }
+
+func TestSplitPath(t *testing.T) {
+	tests := []struct {
+		name         string
+		path         string
+		wantBucket   string
+		wantFileName string
+		wantErr      bool
+	}{
+		{"test_0", "images/alpha.png", "images", "alpha.png", false},
+		{"test_1", "images/sub/alpha.png", "images", "sub/alpha.png", false},
+		{"test_2", "images/../alpha.png", "images", "../alpha.png", false},
+		{"test_3", "/images/alpha.png", "images", "alpha.png", false},
+		{"test_4", "/images/sub/alpha.png", "images", "sub/alpha.png", false},
+		{"test_5", "/images/../alpha.png", "images", "../alpha.png", false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gotBucket, gotFileName, err := SplitPath(tt.path)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SplitPath() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			require.Equal(t, tt.wantBucket, gotBucket)
+			require.Equal(t, tt.wantFileName, gotFileName)
+		})
+	}
+}

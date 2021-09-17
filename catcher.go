@@ -3,11 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"strings"
+
 	. "github.com/raver119/statika/classes"
 	. "github.com/raver119/statika/utils"
 	. "github.com/raver119/statika/wt"
-	"net/http"
-	"strings"
 )
 
 type Catcher struct {
@@ -38,28 +39,37 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// request must be formatted as /bucket/filename
-	parts := strings.Split(r.URL.Path, "/")
-	if len(parts) != 3 {
-		w.WriteHeader(http.StatusNotFound)
-		_, _ = w.Write([]byte(fmt.Sprintf("Not found: %v ", r.URL.Path)))
+	bucket, path, err := SplitPath(r.URL.Path)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to fetch bucket: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	bucket := parts[1]
-	fileName := parts[2]
+	if path == "" {
+		http.Error(w, fmt.Sprintf("failed to fetch bucket: %v", path), http.StatusBadRequest)
+		return
+	}
+
+	path, err = SanitizeFileName(path)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to sanitize file name: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	if r.Method == http.MethodGet {
 		// read file from storage & validate it actually exists
 		var reader CloseableReader
 		var err error
 		init := TimeIt(func() {
-			reader, err = (*c.storage).Get(bucket, fileName)
+			reader, err = (*c.storage).Get(bucket, path)
 		})
 
-		if err != nil {
+		if err == errNotFound {
 			w.WriteHeader(http.StatusNotFound)
-			_, _ = w.Write([]byte(fmt.Sprintf("File not found: %v ", r.URL.Path)))
+			return
+		} else if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			_, _ = w.Write([]byte(fmt.Sprintf("File not found: %v ", path)))
 			return
 		}
 
@@ -92,7 +102,7 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_ = (*c.storage).Delete(bucket, fileName)
+		_ = (*c.storage).Delete(bucket, path)
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(ResponseOK())
 	}

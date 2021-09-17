@@ -1,10 +1,35 @@
 package utils
 
 import (
+	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
 )
+
+var re = regexp.MustCompile(`[a-zA-Z0-9-]+`)
+var ref = regexp.MustCompile(`^/{1,}`)
+
+func SplitPath(path string) (bucket string, fileName string, err error) {
+	path = strings.ReplaceAll(path, `\`, "/")
+	path = ref.ReplaceAllString(path, "")
+	chunks := strings.Split(path, "/")
+
+	bucket = chunks[0]
+	if !re.MatchString(bucket) {
+		return "", "", fmt.Errorf("bucket looks bad: [%v]", bucket)
+	}
+
+	if len(chunks) > 1 {
+		fileName = chunks[1]
+
+		for i := 2; i < len(chunks); i++ {
+			fileName = fmt.Sprintf("%v/%v", fileName, chunks[i])
+		}
+	}
+
+	return
+}
 
 // SanitizeFileName function does exactly what it says
 func SanitizeFileName(fileName string) (fname string, err error) {
