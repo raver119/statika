@@ -3,12 +3,13 @@ package utils
 import (
 	"encoding/base64"
 	"fmt"
-	. "github.com/raver119/statika/classes"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 	"time"
+
+	. "github.com/raver119/statika/classes"
 )
 
 /*
@@ -107,15 +108,22 @@ func SetupCacheHeaders(w *http.ResponseWriter, req *http.Request) {
 func EncodePath(bucket string, fileName string) (b string, f string) {
 	b = base64.StdEncoding.EncodeToString([]byte(bucket))
 	// extract file extension
-	re := regexp.MustCompile("(\\.[a-zA-Z0-9]+)$")
-	match := re.FindStringSubmatch(fileName)
+	// FIXME: propagate the error
+	fileName, _ = SanitizeFileName(fileName)
+	ext, _ := ExtractExtension(fileName)
+	path, _ := ExtractPath(fileName)
 
-	if len(match) == 0 {
+	if len(path) > 0 {
+		// do something?
+	}
+
+	if len(ext) == 0 {
 		f = base64.StdEncoding.EncodeToString([]byte(fileName))
 	} else {
 		// encode filename
+		re := regexp.MustCompile(fmt.Sprintf(`\.%v$`, ext))
 		rep := re.ReplaceAllString(fileName, "")
-		f = base64.StdEncoding.EncodeToString([]byte(rep)) + match[0]
+		f = base64.StdEncoding.EncodeToString([]byte(rep)) + "." + ext
 	}
 
 	return b, f

@@ -5,18 +5,19 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/raver119/statika/classes"
-	"github.com/raver119/statika/utils"
 	"io"
 	"io/ioutil"
 	"os"
 	"regexp"
 	"sort"
 	"strings"
+
+	"github.com/raver119/statika/classes"
+	"github.com/raver119/statika/utils"
 )
 
-var reName = regexp.MustCompile("\\..*?$")
-var reXt = regexp.MustCompile("^.*?\\.")
+var reName = regexp.MustCompile(`\..*?$`)
+var reXt = regexp.MustCompile(`^.*?\.`)
 
 /*
 	Local storage can be used as primary storage or mirror backup storage
