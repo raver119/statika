@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	. "github.com/raver119/statika/classes"
@@ -39,7 +40,13 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	bucket, path, err := SplitPath(r.URL.Path)
+	path, err := url.QueryUnescape(r.URL.Path)
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	bucket, path, err := SplitPath(path)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to fetch bucket: %v", err), http.StatusInternalServerError)
 		return
