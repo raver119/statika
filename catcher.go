@@ -52,6 +52,8 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ext, _ := ExtractExtension(path)
+
 	if path == "" {
 		http.Error(w, fmt.Sprintf("failed to fetch bucket: %v", path), http.StatusBadRequest)
 		return
@@ -78,6 +80,15 @@ func (c Catcher) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			_, _ = w.Write([]byte(fmt.Sprintf("File not found: %v ", path)))
 			return
+		}
+
+		// FIXME: make this proper
+		if strings.ToLower(ext) == "css" {
+			w.Header().Set("Content-Type", "text/css")
+		}
+
+		if strings.ToLower(ext) == "js" {
+			w.Header().Set("Content-Type", "application/javascript")
 		}
 
 		if IsTimingEnabled() {
