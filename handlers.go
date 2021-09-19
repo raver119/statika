@@ -221,7 +221,8 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		req.Filename = url.QueryEscape(req.Filename)
+		// escaping the filename disables subfolders
+		//req.Filename = url.QueryEscape(req.Filename)
 		req.Bucket = url.QueryEscape(req.Bucket)
 
 		// validate authorization
