@@ -109,6 +109,14 @@ func TestClient_ListFiles(t *testing.T) {
 
 			// ping must succeed
 			require.NoError(t, client.Ping())
+
+			// Get must succeed as well
+			for _, e := range files {
+				r, err := client.Get(e.FileName)
+				require.NoError(t, err)
+
+				require.Equal(t, content, string(r))
+			}
 		})
 	}
 }

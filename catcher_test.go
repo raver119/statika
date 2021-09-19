@@ -18,6 +18,9 @@ func TestCatcher_ServeHTTP(t *testing.T) {
 	_, err = storage.Put("pictures", "sub/filename.txt", strings.NewReader("sub pictures"))
 	require.NoError(t, err)
 
+	_, err = storage.Put("pictures", "sub/file name.txt", strings.NewReader("sub pictures"))
+	require.NoError(t, err)
+
 	c := Catcher{
 		storage:   &storage,
 		tokenizer: DevTokenizer("123456"),
@@ -35,6 +38,7 @@ func TestCatcher_ServeHTTP(t *testing.T) {
 		{"test_3", httptest.NewRequest(http.MethodGet, "http://localhost/pictures/sub/filename.txt", nil), http.StatusOK, "sub pictures"},
 		{"test_4", httptest.NewRequest(http.MethodGet, "http://localhost/filename.txt", nil), http.StatusBadRequest, ""},
 		{"test_5", httptest.NewRequest(http.MethodGet, "http://localhost/../filename.txt", nil), http.StatusInternalServerError, ""},
+		{"test_6", httptest.NewRequest(http.MethodGet, "http://localhost/pictures/sub/file+name.txt", nil), http.StatusOK, "sub pictures"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

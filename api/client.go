@@ -3,9 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-resty/resty/v2"
 	"io"
 	"net/http"
+
+	"github.com/go-resty/resty/v2"
 )
 
 type Client struct {
@@ -94,6 +95,20 @@ func (c Client) SetMeta(fileName string, meta MetaInfo) (err error) {
 		err = fmt.Errorf("http request returned unexpected url: %v; error code: %v; body: %v;", path, response.StatusCode(), string(response.Body()))
 	}
 	return
+}
+
+func (c Client) Get(fileName string) (r []byte, err error) {
+	response, err := c.resty.R().Get(fmt.Sprintf("%v/%v/%v", c.endpoint, c.bucket, fileName))
+
+	if err != nil {
+		return nil, err
+	}
+
+	if response.StatusCode() == http.StatusNotFound {
+		return nil, fmt.Errorf("file [%v] was not found", fileName)
+	}
+
+	return response.Body(), nil
 }
 
 func (c Client) GetMeta(fileName string) (meta MetaInfo, err error) {

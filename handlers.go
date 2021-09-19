@@ -5,17 +5,17 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	. "github.com/raver119/statika/classes"
 	. "github.com/raver119/statika/utils"
 	. "github.com/raver119/statika/wt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
 )
 
 type ApiHandler struct {
@@ -220,9 +220,6 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNotAcceptable)
 			return
 		}
-
-		req.Filename = url.QueryEscape(req.Filename)
-		req.Bucket = url.QueryEscape(req.Bucket)
 
 		// validate authorization
 		if !srv.validateUploadToken(r, req.Bucket) {

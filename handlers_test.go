@@ -90,6 +90,8 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 		SetBody(positiveUploadReq).
 		Post("http://localhost:9191/rest/v1/file")
 
+	require.NoError(t, err)
+
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode())
 
 	// authorized file upload
@@ -106,7 +108,7 @@ func TestApiHandler_LoginUpload(t *testing.T) {
 	err = json.Unmarshal(resp.Body(), &uploadResp)
 	require.NoError(t, err)
 
-	assert.Equal(t, "/my_test_bucket/file+name.txt", uploadResp.FileName)
+	assert.Equal(t, "/my_test_bucket/file name.txt", uploadResp.FileName)
 
 	// now, it should be possible to request file
 	r, err := http.Get(fmt.Sprintf("http://localhost:%v/%v", TEST_P, uploadResp.FileName))
