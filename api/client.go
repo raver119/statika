@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/go-resty/resty/v2"
+	"github.com/raver119/statika/utils"
 )
 
 type Client struct {
@@ -18,11 +19,22 @@ type Client struct {
 }
 
 func (c Client) UploadFile(fileName string, reader io.Reader) (ur UploadResponse, err error) {
+	fname, err := utils.ExtractFileName(fileName)
+	if err != nil {
+		return UploadResponse{}, err
+	}
+
+	path, err := utils.ExtractPath(fileName)
+	if err != nil {
+		return UploadResponse{}, err
+	}
+
 	response, err := c.resty.R().
-		SetFileReader("file", fileName, reader).
+		SetFileReader("file", fname, reader).
 		SetFormData(map[string]string{
 			"token":  string(c.uploadToken),
 			"bucket": c.bucket,
+			"path": path,
 		}).
 		Post(fmt.Sprintf("%v/rest/v1/file", c.endpoint))
 

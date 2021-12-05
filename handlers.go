@@ -200,7 +200,14 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, _ = srv.processUpload(bucket, fileHeader.Filename, file, w)
+		// if path is not empty - use it as prefix for the filename
+		path := r.FormValue("path")
+		fileName := fileHeader.Filename
+		if len(path) > 0 {
+			fileName = fmt.Sprintf("%v/%v", path, fileName)
+		}
+
+		_, _ = srv.processUpload(bucket, fileName, file, w)
 	} else {
 		// read request
 		body, err := ioutil.ReadAll(r.Body)

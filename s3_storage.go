@@ -37,7 +37,7 @@ func validMode(mode string) bool {
 	return false
 }
 
-func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, err error) {
+func NewS3Storage(bucket string, endpoint string, region string) (s *S3Storage, err error) {
 	spacesKey := utils.GetEnvOrDefault("S3_KEY", "")
 	spacesSecret := utils.GetEnvOrDefault("S3_SECRET", "")
 
@@ -50,24 +50,24 @@ func NewS3Storage(bucket string, endpoint string, region string) (s S3Storage, e
 	// private by default
 	mode := utils.GetEnvOrDefault("ACL", "private")
 	if !validMode(mode) {
-		return S3Storage{}, fmt.Errorf("unknown ACL provided: [%v]", mode)
+		return nil, fmt.Errorf("unknown ACL provided: [%v]", mode)
 	}
 
 	// this client will be reused
 	c, err := buildClient(s3Config)
 	if err != nil {
-		return S3Storage{}, err
+		return nil, err
 	}
 
-	return S3Storage{bucket: bucket, awsConfig: s3Config, s3client: c, mode: mode}, nil
+	return &S3Storage{bucket: bucket, awsConfig: s3Config, s3client: c, mode: mode}, nil
 }
 
 // endpoint looks like "https://nyc3.digitaloceanspaces.com", region is hardcoded
-func NewSpacesStorage(bucket string, endpoint string) (s S3Storage, err error) {
+func NewSpacesStorage(bucket string, endpoint string) (s *S3Storage, err error) {
 	return NewS3Storage(bucket, endpoint, "us-east-1")
 }
 
-func (s S3Storage) Name() string {
+func (s *S3Storage) Name() string {
 	return "S3 storage"
 }
 
@@ -81,11 +81,11 @@ func buildClient(awsConfig *aws.Config) (c *s3.S3, err error) {
 	return
 }
 
-func (s S3Storage) client() (c *s3.S3, err error) {
+func (s *S3Storage) client() (c *s3.S3, err error) {
 	return s.s3client, nil
 }
 
-func (s S3Storage) Get(bucket string, name string) (r classes.CloseableReader, err error) {
+func (s *S3Storage) Get(bucket string, name string) (r classes.CloseableReader, err error) {
 	c, err := s.client()
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (s S3Storage) Get(bucket string, name string) (r classes.CloseableReader, e
 	return result.Body, err
 }
 
-func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error) {
+func (s *S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error) {
 	c, err := s.client()
 	if err != nil {
 		return fileName, err
@@ -127,7 +127,7 @@ func (s S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName st
 	return fmt.Sprintf("%v/%v", bucket, name), err
 }
 
-func (s S3Storage) List(bucket string) (f []classes.FileEntry, err error) {
+func (s *S3Storage) List(bucket string) (f []classes.FileEntry, err error) {
 	c, err := s.client()
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func (s S3Storage) List(bucket string) (f []classes.FileEntry, err error) {
 	return
 }
 
-func (s S3Storage) Delete(bucket string, name string) (err error) {
+func (s *S3Storage) Delete(bucket string, name string) (err error) {
 	c, err := s.client()
 	if err != nil {
 		return err
@@ -166,13 +166,13 @@ func (s S3Storage) Delete(bucket string, name string) (err error) {
 	return err
 }
 
-func (s S3Storage) PutMeta(bucket string, filename string, meta classes.MetaInfo) (err error) {
+func (s *S3Storage) PutMeta(bucket string, filename string, meta classes.MetaInfo) (err error) {
 	b, _ := json.Marshal(meta)
 	_, err = s.Put(bucket, filename+classes.META_EXTENSION, bytes.NewReader(b))
 	return
 }
 
-func (s S3Storage) GetMeta(bucket string, filename string) (meta classes.MetaInfo, err error) {
+func (s *S3Storage) GetMeta(bucket string, filename string) (meta classes.MetaInfo, err error) {
 	b, err := s.Get(bucket, filename+classes.META_EXTENSION)
 	if err != nil {
 		aerr, ok := err.(awserr.Error)
@@ -188,7 +188,7 @@ func (s S3Storage) GetMeta(bucket string, filename string) (meta classes.MetaInf
 	return
 }
 
-func (s S3Storage) DeleteMeta(bucket string, filename string) (err error) {
+func (s *S3Storage) DeleteMeta(bucket string, filename string) (err error) {
 	err = s.Delete(bucket, filename+classes.META_EXTENSION)
 	return
 }

@@ -26,15 +26,15 @@ type LocalStorage struct {
 	rootFolder string
 }
 
-func NewLocalStorage(root string) LocalStorage {
-	return LocalStorage{rootFolder: root}
+func NewLocalStorage(root string) *LocalStorage {
+	return &LocalStorage{rootFolder: root}
 }
 
-func (s LocalStorage) Name() string {
+func (s *LocalStorage) Name() string {
 	return "Local storage"
 }
 
-func (s LocalStorage) prepareFolder(bucket string) (err error) {
+func (s *LocalStorage) prepareFolder(bucket string) (err error) {
 	b := base64.StdEncoding.EncodeToString([]byte(bucket))
 
 	folder := fmt.Sprintf("%v/%v", s.rootFolder, b)
@@ -45,7 +45,7 @@ func (s LocalStorage) prepareFolder(bucket string) (err error) {
 	return
 }
 
-func (s LocalStorage) Get(bucket string, name string) (r classes.CloseableReader, err error) {
+func (s *LocalStorage) Get(bucket string, name string) (r classes.CloseableReader, err error) {
 	path := s.rootFolder + "/" + utils.MasterFileName(bucket, name)
 	if !utils.FileExists(path, true) {
 		err = errNotFound
@@ -56,7 +56,7 @@ func (s LocalStorage) Get(bucket string, name string) (r classes.CloseableReader
 	return
 }
 
-func (s LocalStorage) Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error) {
+func (s *LocalStorage) Put(bucket string, name string, r io.ReadSeeker) (fileName string, err error) {
 	fileName = utils.MasterFileName(bucket, name)
 
 	err = s.prepareFolder(bucket)
@@ -78,7 +78,7 @@ func (s LocalStorage) Put(bucket string, name string, r io.ReadSeeker) (fileName
 	return
 }
 
-func (s LocalStorage) Delete(bucket string, name string) (err error) {
+func (s *LocalStorage) Delete(bucket string, name string) (err error) {
 	err = os.Remove(s.rootFolder + "/" + utils.MasterFileName(bucket, name))
 
 	// meta should be deleted regardless of result
@@ -86,7 +86,7 @@ func (s LocalStorage) Delete(bucket string, name string) (err error) {
 	return
 }
 
-func (s LocalStorage) List(bucket string) (f []classes.FileEntry, err error) {
+func (s *LocalStorage) List(bucket string) (f []classes.FileEntry, err error) {
 	// bucket must be base64-encoded
 	b := base64.StdEncoding.EncodeToString([]byte(bucket))
 
@@ -123,7 +123,7 @@ func (s LocalStorage) List(bucket string) (f []classes.FileEntry, err error) {
 	return
 }
 
-func (s LocalStorage) PutMeta(bucket string, filename string, meta classes.MetaInfo) (err error) {
+func (s *LocalStorage) PutMeta(bucket string, filename string, meta classes.MetaInfo) (err error) {
 	bf := utils.MasterMetaName(bucket, filename)
 
 	err = s.prepareFolder(bucket)
@@ -152,7 +152,7 @@ func (s LocalStorage) PutMeta(bucket string, filename string, meta classes.MetaI
 	return
 }
 
-func (s LocalStorage) GetMeta(bucket string, filename string) (meta classes.MetaInfo, err error) {
+func (s *LocalStorage) GetMeta(bucket string, filename string) (meta classes.MetaInfo, err error) {
 	bf := utils.MasterMetaName(bucket, filename)
 
 	path := fmt.Sprintf("%v/%v", s.rootFolder, bf)
@@ -175,7 +175,7 @@ func (s LocalStorage) GetMeta(bucket string, filename string) (meta classes.Meta
 	return
 }
 
-func (s LocalStorage) DeleteMeta(bucket string, filename string) (err error) {
+func (s *LocalStorage) DeleteMeta(bucket string, filename string) (err error) {
 	bf := utils.MasterMetaName(bucket, filename)
 
 	path := fmt.Sprintf("%v/%v", s.rootFolder, bf)
