@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/raver119/statika/classes"
-	"github.com/raver119/statika/utils"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,8 +21,8 @@ func TestStorage_Universal(t *testing.T) {
 	content := uuid.NewString()
 	var storages = []Storage{NewLocalStorage("/tmp/first"), NewMirrorStorage(NewLocalStorage("/tmp/second"), NewLocalStorage("/tmp/third"))}
 
-	if _, ok := os.LookupEnv("S3_BUCKET"); ok {
-		spacesBucket := utils.GetEnvOrPanic("S3_BUCKET")
+	if spacesBucket, ok := os.LookupEnv("S3_BUCKET"); ok {
+		// this part of test is optional
 		storage, err := NewSpacesStorage(spacesBucket, "https://nyc3.digitaloceanspaces.com")
 		if err == nil {
 			storages = append(storages, storage)
