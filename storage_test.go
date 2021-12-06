@@ -15,6 +15,7 @@ func TestStorage_Universal(t *testing.T) {
 	// FIXME: atm this is linux-only. it should become windows-compatible
 	require.NoError(t, os.MkdirAll("/tmp/first", 0755))
 	require.NoError(t, os.MkdirAll("/tmp/second", 0755))
+	require.NoError(t, os.MkdirAll("/tmp/third", 0755))
 
 	bucket := "foo"
 	fileName := "file.txt"
@@ -62,4 +63,5 @@ func TestStorage_Universal(t *testing.T) {
 	// everything must be removed 
 	require.NoError(t, os.RemoveAll("/tmp/first"))
 	require.NoError(t, os.RemoveAll("/tmp/second"))
+	require.NoError(t, os.RemoveAll("/tmp/third"))
 }
