@@ -113,7 +113,7 @@ func (s *S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName s
 	}
 
 	// use this bucket to upload file
-	object := s3.PutObjectInput{
+	_, err = c.PutObject(&s3.PutObjectInput{
 		Bucket: aws.String(s.bucket),
 		Key:    aws.String(bucket + "/" + name),
 		Body:   r,
@@ -121,10 +121,12 @@ func (s *S3Storage) Put(bucket string, name string, r io.ReadSeeker) (fileName s
 		Metadata: map[string]*string{
 			"x-amz-meta-my-key": aws.String("your-value"), //required?
 		},
+	})
+	if err != nil {
+		return "", err
 	}
 
-	_, err = c.PutObject(&object)
-	return fmt.Sprintf("%v/%v", bucket, name), err
+	return fmt.Sprintf("%v/%v", bucket, name), nil
 }
 
 func (s *S3Storage) List(bucket string) (f []classes.FileEntry, err error) {

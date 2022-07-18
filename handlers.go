@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -178,6 +179,7 @@ func (srv *ApiHandler) processUpload(bucket string, fileName string, reader io.R
 func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	var ct = r.Header.Get("Content-Type")
 	if strings.HasPrefix(ct, "multipart/form-data;") {
+		log.Printf("multipart/form-data upload")
 		bucket := r.FormValue("bucket")
 		if len(bucket) == 0 {
 			http.Error(w, "Missing bucket name", http.StatusBadRequest)
@@ -207,8 +209,14 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 			fileName = fmt.Sprintf("%v/%v", path, fileName)
 		}
 
-		_, _ = srv.processUpload(bucket, fileName, file, w)
+		_, err = srv.processUpload(bucket, fileName, file, w)
+		if err != nil {
+			log.Printf("failed to process form upload: %v", err)
+		}
 	} else {
+		log.Printf("post upload")
+		defer r.Body.Close()
+
 		// read request
 		body, err := ioutil.ReadAll(r.Body)
 		if !OptionallyReport("failed to read body", w, err) {
@@ -240,7 +248,10 @@ func (srv *ApiHandler) Upload(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, _ = srv.processUpload(req.Bucket, req.Filename, bytes.NewReader(b), w)
+		_, err = srv.processUpload(req.Bucket, req.Filename, bytes.NewReader(b), w)
+		if err != nil {
+			log.Printf("failed to process post upload: %v", err)
+		}
 	}
 }
 
