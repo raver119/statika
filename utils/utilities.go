@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -80,8 +81,11 @@ func TransferBytes(r io.Reader, w io.Writer) error {
 func OptionallyReport(message string, w http.ResponseWriter, err error) (ok bool) {
 	ok = err == nil
 	if err != nil {
+		msg := fmt.Sprintf("%v: %v", message, err)
+		log.Print(msg)
+
 		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(message + ": " + err.Error()))
+		_, _ = w.Write([]byte(msg))
 	}
 
 	return
