@@ -1,7 +1,3 @@
-**/.idea/
-**/node_modules/
-**/build/
-**/.vscode/
-
-# debugging binaries
-**/*_debug_bin
+.idea/
+build/
+vendor/

@@ -1,1 +1,0 @@
-Golang API for Statika 
